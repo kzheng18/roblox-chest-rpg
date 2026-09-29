@@ -10,6 +10,7 @@ export type PlayerData = {
 	Revision: number,
 	Power: number,
 	Gold: number,
+	Luck: number,
 	Rebirths: number,
 	OwnedWeapons: {[string]: number},
 	EquippedWeapon: string,

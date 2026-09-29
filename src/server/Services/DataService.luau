@@ -5,98 +5,83 @@ local RunService = game:GetService("RunService")
 local Shared = game.ReplicatedStorage.Shared
 local Types = require(Shared.Types)
 local Economy = require(Shared.Config.Economy)
-local Progression = require(Shared.Util.Progression)
-local FormatNumber = require(Shared.Util.FormatNumber)
-local Remote = require(Shared.Remotes).Get()
+local ProfileSchema = require(Shared.Util.ProfileSchema)
 local ProfileStore = require(script.Parent.Parent.Packages.ProfileStore)
+local RuntimeState = require(script.Parent.Parent.Components.RuntimeState)
+local StateReplicator = require(script.Parent.Parent.Components.StateReplicator)
+
+ProfileStore.SetConstant("AUTO_SAVE_PERIOD", Economy.AutoSaveSeconds)
 
 local studio = RunService:IsStudio()
-local store = ProfileStore.New(if studio then Economy.StudioStoreName else Economy.StoreName, Progression.New())
+local store = ProfileStore.New(if studio then Economy.StudioStoreName else Economy.StoreName, ProfileSchema.New())
 if studio then
 	store = store.Mock
 end
 
 local profiles: {[Player]: any} = {}
+local saveGeneration: {[Player]: number} = {}
 local DataService = {}
-
-local function copy(value: any): any
-	if type(value) ~= "table" then
-		return value
-	end
-	local result = {}
-	for key, item in value do
-		result[key] = copy(item)
-	end
-	return result
-end
 
 function DataService.Get(player: Player): Types.PlayerData?
 	local profile = profiles[player]
-	return if profile and profile:IsActive() then profile.Data else nil
+	if not profile or not profile:IsActive() then
+		return nil
+	end
+	return RuntimeState.Get(player)
 end
 
 function DataService.Snapshot(player: Player)
-	local data = DataService.Get(player)
-	if not data then
-		return
-	end
-	Remote:FireClient(player, "State", {
-		Power = data.Power,
-		Gold = data.Gold,
-		Luck = Progression.Luck(data),
-		Rebirths = data.Rebirths,
-		OwnedWeapons = data.OwnedWeapons,
-		EquippedWeapon = data.EquippedWeapon,
-		UnlockedRegions = data.UnlockedRegions,
-		CurrentRegion = data.CurrentRegion,
-		Settings = data.Settings,
-		PowerGain = Progression.PowerGain(data),
-		GoldGain = Progression.GoldGain(data),
-	})
+	StateReplicator.Snapshot(player)
 end
 
-function DataService.Sync(player: Player, full: boolean?)
-	local data = DataService.Get(player)
-	if not data then
-		return
+function DataService.Touch(player: Player, fields: {string}, immediate: boolean?): number?
+	local revision = RuntimeState.Commit(player, fields)
+	if revision and immediate then
+		StateReplicator.Flush(player)
 	end
-	player:SetAttribute("Power", data.Power)
-	player:SetAttribute("Gold", data.Gold)
-	player:SetAttribute("Luck", Progression.Luck(data))
-	player:SetAttribute("Rebirths", data.Rebirths)
-	player:SetAttribute("EquippedWeapon", data.EquippedWeapon)
-	player:SetAttribute("CurrentRegion", data.CurrentRegion)
-	player:SetAttribute("PowerGain", Progression.PowerGain(data))
-	player:SetAttribute("GoldGain", Progression.GoldGain(data))
-	player:SetAttribute("RollAnimation", data.Settings.RollAnimation)
-	player:SetAttribute("ReducedMotion", data.Settings.ReducedMotion)
-	player:SetAttribute("Volume", data.Settings.Volume)
-
-	local stats = player:FindFirstChild("leaderstats")
-	if stats then
-		local power = stats:FindFirstChild("Power") :: StringValue?
-		local gold = stats:FindFirstChild("Gold") :: StringValue?
-		if power then power.Value = FormatNumber(data.Power) end
-		if gold then gold.Value = FormatNumber(data.Gold) end
-	end
-
-	if full then
-		DataService.Snapshot(player)
-	end
+	return revision
 end
 
-function DataService.Touch(player: Player, full: boolean?)
-	local data = DataService.Get(player)
-	if not data then
+function DataService.RequestSave(player: Player, reason: string?)
+	local profile = profiles[player]
+	if not profile or not profile:IsActive() then
 		return
 	end
-	data.Revision += 1
-	DataService.Sync(player, full)
+	local generation = (saveGeneration[player] or 0) + 1
+	saveGeneration[player] = generation
+	player:SetAttribute("SaveStatus", "Queued")
+	player:SetAttribute("SaveReason", reason or "Progress")
+	task.delay(Economy.CriticalSaveDebounce, function()
+		if saveGeneration[player] ~= generation then
+			return
+		end
+		local current = profiles[player]
+		if current ~= profile or not profile:IsActive() then
+			return
+		end
+		profile:Save()
+	end)
+end
+
+local function createLeaderstats(player: Player)
+	local existing = player:FindFirstChild("leaderstats")
+	if existing then
+		existing:Destroy()
+	end
+	local leaderstats = Instance.new("Folder")
+	leaderstats.Name = "leaderstats"
+	leaderstats.Parent = player
+	for _, name in {"Power", "Gold"} do
+		local stat = Instance.new("StringValue")
+		stat.Name = name
+		stat.Parent = leaderstats
+	end
 end
 
 local function join(player: Player)
 	player:SetAttribute("DataReady", false)
 	player:SetAttribute("DataStatus", "Loading progression…")
+	player:SetAttribute("SaveStatus", "Loading")
 	local started = os.clock()
 	local ok, profile = pcall(function()
 		return store:StartSessionAsync("Player_" .. player.UserId, {
@@ -115,46 +100,61 @@ local function join(player: Player)
 	end
 
 	profile:AddUserId(player.UserId)
-	local migratedOk, migrated = pcall(Progression.Migrate, copy(profile.Data))
+	local migratedOk, migrated = pcall(ProfileSchema.Migrate, profile.Data)
 	if not migratedOk then
 		warn(migrated)
 		profile:EndSession()
 		player:Kick("Your progression needs a data update. Please try again later.")
 		return
 	end
+	local valid, validationReason = ProfileSchema.Validate(migrated)
+	if not valid then
+		warn("[DataService] Invalid migrated profile: " .. tostring(validationReason))
+		profile:EndSession()
+		player:Kick("Your progression needs a data update. Please try again later.")
+		return
+	end
+
 	profile.Data = migrated
 	profiles[player] = profile
+	RuntimeState.Attach(player, migrated)
+	createLeaderstats(player)
 
+	profile.OnSave:Connect(function()
+		player:SetAttribute("SaveStatus", "Saving")
+	end)
+	profile.OnAfterSave:Connect(function()
+		player:SetAttribute("SaveStatus", "Saved")
+	end)
 	profile.OnSessionEnd:Connect(function()
-		profiles[player] = nil
+		if profiles[player] == profile then
+			profiles[player] = nil
+		end
+		saveGeneration[player] = nil
+		RuntimeState.Detach(player)
 		player:SetAttribute("DataReady", false)
 		if player.Parent == Players then
 			player:Kick("Your save session ended. Rejoin to protect your progression.")
 		end
 	end)
 
-	local leaderstats = Instance.new("Folder")
-	leaderstats.Name = "leaderstats"
-	leaderstats.Parent = player
-	for _, name in {"Power", "Gold"} do
-		local stat = Instance.new("StringValue")
-		stat.Name = name
-		stat.Parent = leaderstats
-	end
-
 	player:SetAttribute("DataStatus", if studio then "Temporary Studio session" else "Cloud save active")
+	player:SetAttribute("SaveStatus", "Loaded")
 	player:SetAttribute("DataReady", true)
-	DataService.Sync(player, true)
+	StateReplicator.Snapshot(player)
 end
 
 function DataService.Start()
+	StateReplicator.Start()
 	Players.PlayerAdded:Connect(function(player)
 		task.spawn(join, player)
 	end)
 	Players.PlayerRemoving:Connect(function(player)
+		saveGeneration[player] = nil
 		local profile = profiles[player]
 		if profile then
 			profiles[player] = nil
+			RuntimeState.Detach(player)
 			profile:EndSession()
 		end
 	end)
@@ -164,4 +164,3 @@ function DataService.Start()
 end
 
 return DataService
-

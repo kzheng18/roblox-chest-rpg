@@ -3,6 +3,8 @@ return {
 	StoreName = "ChestRPG_PlayerData_v1",
 	StudioStoreName = "ChestRPG_Studio_v1",
 	LoadTimeout = 18,
+	AutoSaveSeconds = 120,
+	CriticalSaveDebounce = 4,
 	StartingGold = 100,
 	BasePowerGain = 1,
 	BaseGoldGain = 2,
@@ -12,4 +14,3 @@ return {
 	RebirthPowerRequirement = 20_000,
 	TrainCooldown = 0.18,
 }
-

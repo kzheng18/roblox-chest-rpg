@@ -220,7 +220,7 @@ local function buildUI()
 	end
 end
 
-local function refresh()
+local function refresh(refreshModal: boolean?)
 	if not state then return end
 	(refs.Power :: TextLabel).Text = "POWER  " .. FormatNumber(state.Power)
 	(refs.Gold :: TextLabel).Text = "GOLD  " .. FormatNumber(state.Gold)
@@ -230,8 +230,10 @@ local function refresh()
 	if region then
 		(refs.ChestButton :: TextButton).Text = string.format("OPEN CHEST\n%s Gold", FormatNumber(region.ChestCost))
 	end
-	local refreshModal = refs.RefreshModal :: any
-	if refreshModal then refreshModal() end
+	if refreshModal then
+		local refreshModalFn = refs.RefreshModal :: any
+		if refreshModalFn then refreshModalFn() end
+	end
 end
 
 local toastToken = 0
@@ -269,8 +271,31 @@ function UIController.Start()
 	buildUI()
 	Remote.OnClientEvent:Connect(function(action: string, payload: any)
 		if action == "State" then
+			if type(payload) ~= "table" then return end
+			if state and type(state.Revision) == "number" and type(payload.Revision) == "number" and payload.Revision < state.Revision then
+				return
+			end
 			state = payload
-			refresh()
+			refresh(true)
+		elseif action == "StateDelta" then
+			if type(payload) ~= "table" or type(payload.Changes) ~= "table" or type(payload.Revision) ~= "number" then return end
+			if not state then
+				Remote:FireServer("RequestState")
+				return
+			end
+			if type(state.Revision) == "number" and payload.Revision <= state.Revision then return end
+			local changes = payload.Changes
+			for key, value in changes do
+				state[key] = value
+			end
+			state.Revision = payload.Revision
+			local needsModalRefresh = changes.OwnedWeapons ~= nil
+				or changes.EquippedWeapon ~= nil
+				or changes.UnlockedRegions ~= nil
+				or changes.CurrentRegion ~= nil
+				or changes.Settings ~= nil
+				or changes.Rebirths ~= nil
+			refresh(needsModalRefresh)
 		elseif action == "Toast" and type(payload) == "string" then
 			showToast(payload)
 		elseif action == "ChestResult" and type(payload) == "table" then

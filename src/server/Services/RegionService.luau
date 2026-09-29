@@ -25,7 +25,8 @@ function RegionService.Unlock(player: Player, regionId: string)
 	end
 	data.UnlockedRegions[regionId] = true
 	data.CurrentRegion = regionId
-	DataService.Touch(player, true)
+	DataService.Touch(player, {"UnlockedRegions", "CurrentRegion"}, true)
+	DataService.RequestSave(player, "Region unlock")
 	teleport(player, regionId)
 end
 
@@ -33,9 +34,8 @@ function RegionService.Travel(player: Player, regionId: string)
 	local data = DataService.Get(player)
 	if not data or not data.UnlockedRegions[regionId] or not Regions.ById[regionId] then return end
 	data.CurrentRegion = regionId
-	DataService.Touch(player, true)
+	DataService.Touch(player, {"CurrentRegion"}, true)
 	teleport(player, regionId)
 end
 
 return RegionService
-

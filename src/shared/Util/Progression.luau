@@ -4,53 +4,20 @@ local Economy = require(Shared.Config.Economy)
 local Regions = require(Shared.Config.Regions)
 local Weapons = require(Shared.Config.Weapons)
 local Types = require(Shared.Types)
+local ProfileSchema = require(Shared.Util.ProfileSchema)
 
 local Progression = {}
 
 function Progression.New(): Types.PlayerData
-	return {
-		Version = 1,
-		Revision = 0,
-		Power = 0,
-		Gold = Economy.StartingGold,
-		Rebirths = 0,
-		OwnedWeapons = {},
-		EquippedWeapon = "",
-		UnlockedRegions = {verdant = true},
-		CurrentRegion = "verdant",
-		Settings = {
-			RollAnimation = true,
-			ReducedMotion = false,
-			Volume = 0.8,
-		},
-	}
+	return ProfileSchema.New()
 end
 
 function Progression.Migrate(data: any): Types.PlayerData
-	local template = Progression.New()
-	if type(data) ~= "table" then
-		return template
-	end
-	for key, value in template do
-		if data[key] == nil then
-			data[key] = value
-		end
-	end
-	if type(data.Settings) ~= "table" then
-		data.Settings = template.Settings
-	else
-		for key, value in template.Settings do
-			if data.Settings[key] == nil then
-				data.Settings[key] = value
-			end
-		end
-	end
-	data.Version = 1
-	return data :: Types.PlayerData
+	return ProfileSchema.Migrate(data)
 end
 
 function Progression.Luck(data: Types.PlayerData): number
-	return 1 + data.Rebirths * Economy.LuckPerRebirth
+	return math.max(1, data.Luck)
 end
 
 function Progression.WeaponMultiplier(data: Types.PlayerData): number
@@ -65,6 +32,19 @@ end
 
 function Progression.GoldGain(data: Types.PlayerData): number
 	return Economy.BaseGoldGain * (1 + data.Rebirths * Economy.GoldPerRebirth)
+end
+
+function Progression.ApplyRebirth(data: Types.PlayerData): boolean
+	if data.Power < Economy.RebirthPowerRequirement then
+		return false
+	end
+	data.Rebirths += 1
+	data.Luck = math.max(1, data.Luck) + Economy.LuckPerRebirth
+	data.Power = 0
+	data.Gold = Economy.StartingGold
+	data.UnlockedRegions = {verdant = true}
+	data.CurrentRegion = "verdant"
+	return true
 end
 
 function Progression.CurrentRateN(weapon: any, luck: number): number
@@ -105,4 +85,3 @@ function Progression.BestOwnedWeapon(data: Types.PlayerData): string
 end
 
 return Progression
-

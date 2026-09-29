@@ -53,7 +53,8 @@ function ChestService.Open(player: Player, regionId: string)
 	if not current or weapon.PowerMultiplier > current.PowerMultiplier then
 		data.EquippedWeapon = weapon.Id
 	end
-	DataService.Touch(player, true)
+	DataService.Touch(player, {"Gold", "OwnedWeapons", "EquippedWeapon", "PowerGain"}, true)
+	DataService.RequestSave(player, "Weapon reward")
 	Remote:FireClient(player, "ChestResult", {
 		Id = weapon.Id,
 		Name = weapon.Name,
@@ -70,4 +71,3 @@ function ChestService.Cleanup(player: Player)
 end
 
 return ChestService
-

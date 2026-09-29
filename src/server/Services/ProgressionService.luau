@@ -16,7 +16,7 @@ function ProgressionService.Train(player: Player)
 	lastTrain[player] = now
 	data.Power += Progression.PowerGain(data)
 	data.Gold += Progression.GoldGain(data)
-	DataService.Touch(player, false)
+	DataService.Touch(player, {"Power", "Gold"}, false)
 end
 
 function ProgressionService.Equip(player: Player, weaponId: string)
@@ -25,7 +25,8 @@ function ProgressionService.Equip(player: Player, weaponId: string)
 		return
 	end
 	data.EquippedWeapon = weaponId
-	DataService.Touch(player, true)
+	DataService.Touch(player, {"EquippedWeapon", "PowerGain"}, true)
+	DataService.RequestSave(player, "Weapon equip")
 end
 
 function ProgressionService.EquipBest(player: Player)
@@ -34,18 +35,24 @@ function ProgressionService.EquipBest(player: Player)
 	local best = Progression.BestOwnedWeapon(data)
 	if best == "" then return end
 	data.EquippedWeapon = best
-	DataService.Touch(player, true)
+	DataService.Touch(player, {"EquippedWeapon", "PowerGain"}, true)
+	DataService.RequestSave(player, "Weapon equip")
 end
 
 function ProgressionService.Rebirth(player: Player)
 	local data = DataService.Get(player)
-	if not data or data.Power < Economy.RebirthPowerRequirement then return end
-	data.Rebirths += 1
-	data.Power = 0
-	data.Gold = Economy.StartingGold
-	data.UnlockedRegions = {verdant = true}
-	data.CurrentRegion = "verdant"
-	DataService.Touch(player, true)
+	if not data or not Progression.ApplyRebirth(data) then return end
+	DataService.Touch(player, {
+		"Rebirths",
+		"Luck",
+		"Power",
+		"Gold",
+		"UnlockedRegions",
+		"CurrentRegion",
+		"PowerGain",
+		"GoldGain",
+	}, true)
+	DataService.RequestSave(player, "Rebirth")
 end
 
 function ProgressionService.UpdateSetting(player: Player, key: string, value: any)
@@ -60,7 +67,8 @@ function ProgressionService.UpdateSetting(player: Player, key: string, value: an
 	else
 		return
 	end
-	DataService.Touch(player, true)
+	DataService.Touch(player, {"Settings"}, true)
+	DataService.RequestSave(player, "Settings")
 end
 
 function ProgressionService.Cleanup(player: Player)
@@ -68,4 +76,3 @@ function ProgressionService.Cleanup(player: Player)
 end
 
 return ProgressionService
-
