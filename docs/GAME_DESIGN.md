@@ -1,6 +1,18 @@
 # Chest RPG — User Stories and Build Order
 
-> Planning backlog for the next progression-game direction. The current Aura Ascension RNG implementation remains intact while this design is iterated and validated.
+> Canonical backlog for the standalone Roblox Chest RPG. Stories describe acceptance targets; existing code is not proof that a story has passed. Iterate through the stages below and record validation before closing a story.
+
+## Delivery stages and GitHub stories
+
+| Stage | Stories | Playable checkpoint |
+| --- | --- | --- |
+| 1. Game logistics / systems | [#1 Foundation](https://github.com/kzheng18/roblox-chest-rpg/issues/1) | Join, train, earn, rebirth, save, and rejoin with consistent progression |
+| 2. Regions | [#2 Regions](https://github.com/kzheng18/roblox-chest-rpg/issues/2) | Reach a Power gate, unlock it, travel, and see the next goal |
+| 3. Weapons | [#3 Chests and weapons](https://github.com/kzheng18/roblox-chest-rpg/issues/3) | Open a regional chest, compare, equip, and feel faster progression |
+| 4. Combat and animations | [#4 Combat](https://github.com/kzheng18/roblox-chest-rpg/issues/4), [#6 Enemies](https://github.com/kzheng18/roblox-chest-rpg/issues/6), [#5 Signature ability](https://github.com/kzheng18/roblox-chest-rpg/issues/5) | Use an original weapon moveset and one original barrage against real targets |
+| 5. Everything together | [#7 Integration](https://github.com/kzheng18/roblox-chest-rpg/issues/7) | Complete the new-player loop through Region 2 and Rebirth |
+
+Each checkpoint gets a playable review before expanding the next stage. Start with original placeholder art; invest in finished models, icons, animation, and effects after their interactions work. Build reusable UI components from Stage 1 so readability is tested throughout.
 
 ## Product north star
 
@@ -30,6 +42,17 @@ Every screen and interaction should follow the same reference mix:
 
 These are references for hierarchy, pacing, and feel only. All art, panels, icons, models, names, animations, audio, VFX, and other shipped assets must be original.
 
+### Presentation acceptance for every player-facing story
+
+The percentages express the intended creative balance, not a measurable asset quota or a claim about those games' exact interfaces.
+
+- **Fantasy identity (60%):** original frames, restrained material textures, coherent typography, and world-themed accents. Decoration must leave text and controls readable.
+- **Inventory/readability (25%):** consistent slots, recognizable weapon silhouettes, concise stat comparisons, and explicit selected/equipped states. Rarity is labeled as well as colored.
+- **Roblox RPG usability (15%):** clear back/close actions, touch-friendly controls, controller focus, and prompts appropriate to the active input device. Essential information cannot require hovering.
+- Verify the HUD, region gate, chest panel, inventory, Rebirth panel, and combat controls on desktop and a phone-sized viewport. Test controller navigation on each interactive screen.
+- Use shared panel, button, slot, tooltip, progress-bar, and number-format components. Provide loading, empty, insufficient-Gold, locked-region, and action-failed states where relevant.
+- Reduced motion/effects must preserve attack telegraphs and loot-result readability. No finished-asset requirement should prevent early interaction testing.
+
 ## Global UX rules
 
 - A first-time player should know what to do within roughly five seconds.
@@ -46,6 +69,8 @@ These are references for hierarchy, pacing, and feel only. All art, panels, icon
 ## Story 1 — Core Game Logistics / Systems Foundation
 
 **Priority:** P0 — foundation for every other story.
+
+**Depends on:** None. Complete this checkpoint before expanding regions or the weapon catalog.
 
 **User story:** As a player, I can join, load my progression, gain resources, leave, return, and continue from a valid saved state while every gameplay system uses the same source of truth.
 
@@ -72,6 +97,13 @@ These are references for hierarchy, pacing, and feel only. All art, panels, icon
 - Central number-formatting and stat-display utilities.
 - Rebirth logic that can reset run progression while preserving intended permanent state.
 - No client-provided currency amounts or reward outcomes.
+
+### Foundation iterations
+
+- **1A — Economy contract:** document the repeatable training action, base Power/Gold income, multiplier order, and the distinction between Power gain and combat damage. Use the current training loop as the prototype baseline; do not require an unbuilt enemy system to earn the first chest.
+- **1B — Durable progression:** implement and verify profiles, valid defaults, failed-load handling, and save recovery. A failed load must not overwrite an existing profile with defaults. Label Studio mock sessions as temporary; verify actual persistence in a separate test environment.
+- **1C — Rebirth contract:** explicitly list every reset and retained field, including Gold, region unlocks, owned weapons, and equipped weapon. Preserve the weapon collection per the current prototype direction; resolve how retained weapons affect the next run and show the exact outcome before confirmation. Rebirth bonuses must improve Power gain, Gold gain, and Luck without compounding accidentally on rejoin.
+- **1D — Usable shell:** deliver shared UI components, the Power/Gold/Luck HUD, one Next Goal, and clear loading/error states. Review hierarchy and touch usability using original placeholder art.
 
 ### Architecture target
 
@@ -104,12 +136,17 @@ Client Controllers / UI
 - Invalid client requests cannot directly grant currency, weapons, unlocks, or damage.
 - Balance values can be changed from configuration without rewriting multiple systems.
 - Placeholder HUD can display Power, Gold, and Luck from replicated authoritative state.
+- A player with no Gold and no chest weapon can always resume earning; progression cannot dead-end after Rebirth.
+- Rebirth's displayed resets/rewards match the server result, and duplicate requests do not grant duplicate bonuses.
+- Record save/rejoin, failed-load, and Rebirth validation evidence before closing Story 1. Infrastructure for later services is sufficient here; combat itself belongs to Story 4.
 
 ---
 
 ## Story 2 — Regions / World Progression
 
 **Priority:** P0.
+
+**Depends on:** Story 1. Test with simple original world geometry before commissioning region art.
 
 **User story:** As a player, I always know which region I am in, what region comes next, and exactly what I need to unlock it.
 
@@ -161,6 +198,8 @@ Your Power: 184.2K
 
 **Priority:** P0.
 
+**Depends on:** Stories 1–2. Complete the reward-to-equip loop before expanding rarity tiers or models.
+
 **User story:** As a player, I can spend Gold on a region chest, have Luck influence the result, receive a weapon from that region, inspect it, equip it, and immediately feel stronger.
 
 ### Chest rules
@@ -173,6 +212,9 @@ Your Power: 184.2K
 - Reward selection is performed on the server.
 - Rare rewards escalate reveal animation, sound, and VFX.
 - Multi-open can be added later without changing the underlying roll pipeline.
+- The cost debit and weapon grant form one authoritative transaction; duplicate requests must not spend or grant twice.
+- Displayed current odds use the same Luck-adjusted distribution as the server roll. Clearly distinguish base odds and rounded current odds.
+- Insufficient Gold, unavailable regions, full inventory if capped, and interrupted reveals have clear outcomes. Skipping or disconnecting during a reveal cannot lose an already-granted weapon.
 
 ### Initial weapon data
 
@@ -222,6 +264,8 @@ Not every region needs every rarity.
 ## Story 4 — Weapon Combat + Animation Framework
 
 **Priority:** P0.
+
+**Depends on:** Story 3. Start with a target dummy; develop Story 6's normal enemy alongside combat before the signature ability.
 
 **User story:** As a player, when I equip a weapon, it appears on my character and gives me responsive, satisfying combat that can scale from simple weapons to rare signature abilities.
 
@@ -287,12 +331,16 @@ Avoid turning the core loop into a many-key MMO action bar.
 - At least two weapon families can share the framework while using different animation/combat profiles.
 - Hits, damage, and cooldown enforcement are server-authoritative.
 - Combat feels readable on desktop and mobile.
+- First prove one family from equip to impact, then add the second family to validate reuse.
+- Original wind-up, contact, and recovery timing aligns with server hit windows. Respawning, unequipping, or opening menus cannot leave an attack running or a control stuck.
 
 ---
 
 ## Story 5 — Rare Weapon Abilities
 
-**Priority:** P1 after base combat is proven.
+**Priority:** P0 for one showcase ability in the integrated slice; additional archetypes are P1.
+
+**Depends on:** Story 4 and Story 6's working combat targets.
 
 **User story:** As a player, obtaining a rare weapon can unlock a memorable signature ability so the reward changes how I play instead of only increasing a number.
 
@@ -310,6 +358,8 @@ Avoid turning the core loop into a many-key MMO action bar.
 | Secret | Highest-tier signature/ultimate presentation |
 
 ### Reusable ability archetypes
+
+These are future options. Build only the barrage archetype for the first slice.
 
 - Barrage.
 - Dash slash.
@@ -352,7 +402,9 @@ The fantasy can be inspired by rapid anime-style attacks, but names, animation, 
 
 ## Story 6 — Enemies + Combat Targets
 
-**Priority:** P1, developed alongside Story 4/5 validation.
+**Priority:** P0 for normal enemies and one boss in the integrated slice; elites and extra bosses are P1.
+
+**Depends on:** Story 2's regions and Story 4's basic combat. Deliver a normal enemy first, then a boss after the basic interaction works.
 
 **User story:** As a player, every region contains readable enemies appropriate to my progression so the weapons I obtain have a meaningful use.
 
@@ -392,6 +444,8 @@ Bosses should supplement the chest loop rather than replace it. Potential reward
 ## Story 7 — Vertical Slice Integration / Does the Game Actually Work Together?
 
 **Priority:** P0 release gate for expanding content.
+
+**Depends on:** Stories 1–6, delivered through the five stages above.
 
 **User story:** As a new player, I can experience the entire intended progression loop from first join through a new region, better weapon, meaningful combat, and first Rebirth without encountering contradictory systems or confusing UI.
 
@@ -456,6 +510,15 @@ Before producing many regions, weapons, or expensive VFX/models, the slice must 
 7. Can a first-time player understand all of this with minimal reading?
 
 If the answer to a core question is no, fix the loop before multiplying content.
+
+### Validation record
+
+- Run the journey with a fresh profile and again after Rebirth; record time to first chest, first useful upgrade, Region 2, and first Rebirth. The first-minute reward is a playtest target, not an asserted result.
+- Observe new players without coaching and record where they hesitate, misread stats, or cannot find the next action.
+- Check the presentation acceptance requirements above across desktop, touch, and controller.
+- Test combat and shared rewards with at least two players, including respawn and reconnect during a chest reveal.
+- Use a separate test profile to verify real save/rejoin behavior; Studio mock results alone cannot pass persistence.
+- Attach results and remaining problems to the GitHub story. Closing the integration story requires evidence that the full loop works, including the faster second run.
 
 ---
 
