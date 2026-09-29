@@ -1,0 +1,112 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="4">
+  <External>null</External>
+  <External>nil</External>
+  <Item class="Model" referent="RBX0">
+    <Properties>
+      <string name="Name">ChestRPGWorld</string>
+    </Properties>
+
+    <Item class="Part" referent="RBX1">
+      <Properties>
+        <bool name="Anchored">true</bool>
+        <int name="BrickColor">37</int>
+        <CoordinateFrame name="CFrame"><X>0</X><Y>-3</Y><Z>0</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+        <string name="Name">VerdantGround</string>
+        <Vector3 name="size"><X>260</X><Y>6</Y><Z>190</Z></Vector3>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX2">
+      <Properties>
+        <bool name="Anchored">true</bool>
+        <int name="BrickColor">217</int>
+        <CoordinateFrame name="CFrame"><X>0</X><Y>2</Y><Z>-18</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+        <string name="Name">TreasureChest_verdant</string>
+        <Vector3 name="size"><X>8</X><Y>3</Y><Z>5</Z></Vector3>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX3">
+      <Properties>
+        <bool name="Anchored">true</bool>
+        <int name="BrickColor">24</int>
+        <CoordinateFrame name="CFrame"><X>0</X><Y>4.1</Y><Z>-18</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+        <string name="Name">TreasureChestLid_verdant</string>
+        <Vector3 name="size"><X>8.4</X><Y>1.4</Y><Z>5.4</Z></Vector3>
+      </Properties>
+    </Item>
+
+    <Item class="Part" referent="RBX4">
+      <Properties>
+        <bool name="Anchored">true</bool>
+        <int name="BrickColor">102</int>
+        <CoordinateFrame name="CFrame"><X>420</X><Y>-3</Y><Z>0</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+        <string name="Name">FrostfallGround</string>
+        <Vector3 name="size"><X>260</X><Y>6</Y><Z>190</Z></Vector3>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX5">
+      <Properties>
+        <bool name="Anchored">true</bool>
+        <int name="BrickColor">217</int>
+        <CoordinateFrame name="CFrame"><X>420</X><Y>2</Y><Z>-18</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+        <string name="Name">TreasureChest_frostfall</string>
+        <Vector3 name="size"><X>8</X><Y>3</Y><Z>5</Z></Vector3>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX6">
+      <Properties>
+        <bool name="Anchored">true</bool>
+        <int name="BrickColor">23</int>
+        <CoordinateFrame name="CFrame"><X>420</X><Y>4.1</Y><Z>-18</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+        <string name="Name">TreasureChestLid_frostfall</string>
+        <Vector3 name="size"><X>8.4</X><Y>1.4</Y><Z>5.4</Z></Vector3>
+      </Properties>
+    </Item>
+
+    <Item class="Part" referent="RBX7">
+      <Properties>
+        <bool name="Anchored">true</bool>
+        <int name="BrickColor">38</int>
+        <CoordinateFrame name="CFrame"><X>840</X><Y>-3</Y><Z>0</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+        <string name="Name">EmberreachGround</string>
+        <Vector3 name="size"><X>260</X><Y>6</Y><Z>190</Z></Vector3>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX8">
+      <Properties>
+        <bool name="Anchored">true</bool>
+        <int name="BrickColor">217</int>
+        <CoordinateFrame name="CFrame"><X>840</X><Y>2</Y><Z>-18</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+        <string name="Name">TreasureChest_emberreach</string>
+        <Vector3 name="size"><X>8</X><Y>3</Y><Z>5</Z></Vector3>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX9">
+      <Properties>
+        <bool name="Anchored">true</bool>
+        <int name="BrickColor">21</int>
+        <CoordinateFrame name="CFrame"><X>840</X><Y>4.1</Y><Z>-18</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+        <string name="Name">TreasureChestLid_emberreach</string>
+        <Vector3 name="size"><X>8.4</X><Y>1.4</Y><Z>5.4</Z></Vector3>
+      </Properties>
+    </Item>
+
+    <Item class="Part" referent="RBX10">
+      <Properties>
+        <bool name="Anchored">true</bool>
+        <int name="BrickColor">217</int>
+        <CoordinateFrame name="CFrame"><X>210</X><Y>1</Y><Z>0</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+        <string name="Name">Bridge_verdant</string>
+        <Vector3 name="size"><X>160</X><Y>2</Y><Z>18</Z></Vector3>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX11">
+      <Properties>
+        <bool name="Anchored">true</bool>
+        <int name="BrickColor">217</int>
+        <CoordinateFrame name="CFrame"><X>630</X><Y>1</Y><Z>0</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+        <string name="Name">Bridge_frostfall</string>
+        <Vector3 name="size"><X>160</X><Y>2</Y><Z>18</Z></Vector3>
+      </Properties>
+    </Item>
+  </Item>
+</roblox>
