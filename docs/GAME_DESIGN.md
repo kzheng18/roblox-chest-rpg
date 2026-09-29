@@ -72,6 +72,8 @@ The percentages express the intended creative balance, not a measurable asset qu
 
 **Depends on:** None. Complete this checkpoint before expanding regions or the weapon catalog.
 
+**Security contract:** [Core systems, player identity, and data security](CORE_SYSTEMS_SECURITY.md) defines required authentication boundaries, profile invariants, save durability, transactions, privacy, and recovery. Its SEC-01 through SEC-07 substories and open code findings are part of Story 1's acceptance criteria, not optional polish.
+
 **User story:** As a player, I can join, load my progression, gain resources, leave, return, and continue from a valid saved state while every gameplay system uses the same source of truth.
 
 ### Required player state
@@ -139,6 +141,7 @@ Client Controllers / UI
 - A player with no Gold and no chest weapon can always resume earning; progression cannot dead-end after Rebirth.
 - Rebirth's displayed resets/rewards match the server result, and duplicate requests do not grant duplicate bonuses.
 - Record save/rejoin, failed-load, and Rebirth validation evidence before closing Story 1. Infrastructure for later services is sufficient here; combat itself belongs to Story 4.
+- Pass SEC-01 through SEC-07 in the linked security contract. A code review alone cannot satisfy the live session, failure, persistence, and recovery drills.
 
 ---
 
@@ -519,6 +522,7 @@ If the answer to a core question is no, fix the loop before multiplying content.
 - Test combat and shared rewards with at least two players, including respawn and reconnect during a chest reveal.
 - Use a separate test profile to verify real save/rejoin behavior; Studio mock results alone cannot pass persistence.
 - Attach results and remaining problems to the GitHub story. Closing the integration story requires evidence that the full loop works, including the faster second run.
+- Include the security contract's transaction, privacy, and save-failure acceptance checks. Verify that pending rewards and saved rewards are distinguished throughout the journey.
 
 ---
 

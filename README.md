@@ -21,6 +21,8 @@ This repository is intentionally separate from Aura Ascension. Aura Ascension is
 
 The product direction and staged build order live in [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md).
 
+Story 1's [core systems and security contract](docs/CORE_SYSTEMS_SECURITY.md) defines identity, data integrity, transaction safety, privacy, and recovery requirements, with current code gaps and release acceptance checks. These are requirements under development, not a claim that the prototype has passed a security audit.
+
 ## Build
 
 ```bash
@@ -28,4 +30,3 @@ rojo build -o ChestRPG.rbxlx
 ```
 
 Open the generated place in Roblox Studio for playtesting, or run `rojo serve` and connect with the Rojo Studio plugin.
-
