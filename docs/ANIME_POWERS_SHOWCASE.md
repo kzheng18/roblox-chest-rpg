@@ -17,6 +17,7 @@ The first theme is a pirate / devil-fruit style anime. It starts with simple ele
 | Power scaling | **Each anime has its own power curve.** Balance each theme against the regions where it drops, not against a single global table. |
 | Naming | **No real anime names.** Use descriptive original names. See the naming rules below. |
 | Architecture | One shared power framework. A new anime is a config entry plus a VFX module, never a new system. |
+| Stacking | **Each anime has its own equip slot, and the slots multiply together.** A Fruit and a Grimoire equipped at once stack on top of the weapon and rebirth bonuses. |
 
 ## Naming rules (copyright safety)
 
@@ -82,3 +83,46 @@ A pedestal area or leaderboard in the hub that displays top players and their ra
 - **Performance.** Many players with auras and skills can lag phones. Keep auras light, limit particle counts, reduce effects at distance, and add a setting to hide other players' effects.
 - **Copyright.** Risk grows with every recognizable franchise added. Follow the naming rules above for every update.
 - **Animations.** Custom animations play in Studio testing, but must be published to the game owner's Roblox account to get animation IDs for the live game.
+
+## Implementation status (branch `feature/power-framework`)
+
+Built and covered by local tests. Not yet synced into the Studio place or playtested live.
+
+| Piece | Where |
+| --- | --- |
+| Power catalog: themes, slots, per-region pools, drop chances | `src/shared/Config/Powers.luau` |
+| Exact final odds and the power roll | `src/shared/Util/PowerOdds.luau` |
+| Reveal tiers and announcement thresholds | `src/shared/Config/Showcase.luau` |
+| Stacking math: `PowerStackMultiplier`, `PowerGain` | `src/shared/Util/Progression.luau` |
+| Save schema v4: `OwnedPowers`, `EquippedPowers`, power in chest receipt | `src/shared/Util/ProfileSchema.luau` |
+| Bonus power roll, per-slot auto-equip, replay-safe receipt | `src/server/Services/ChestService.luau` |
+| Server and cross-server rare-pull announcements | `src/server/Services/AnnouncementService.luau` |
+| Equip Best fills every anime slot | `src/server/Services/ProgressionService.luau` |
+| Tiered reveal queue: weapon first, then bonus power | `src/client/Controllers/UIController.luau` |
+| Camera push, darken, burst, shockwave | `src/client/Controllers/CinematicController.luau` |
+| Spinning fruit and grimoire models | `src/client/UI/ItemModels.luau` |
+| Announcement banners and chat line | `src/client/Controllers/AnnouncementController.luau` |
+
+### How a chest opening works now
+
+1. The weapon roll is unchanged.
+2. A separate bonus roll can also grant a power. Chance per opening: Verdant 12%, Frostfall 14%, Emberreach 16%.
+3. If a power drops, it goes into that anime's slot when it beats what is equipped there.
+4. The reveal plays the weapon, then the power. Common and Uncommon get the normal roll. Rare and Epic add a color flash. Legendary and Mythic get the cinematic. Every reveal can be skipped, and Reduced motion keeps the camera still.
+5. Legendary, Mythic, or 1-in-1,000 pulls are announced to the server. Mythic or 1-in-5,000 pulls are also sent to every server. Cross-server messages are off in Studio.
+
+Power odds shown to players are exact final odds. Weapon odds keep the existing per-check display, which the scaling review flags separately.
+
+### Adding the next anime
+
+1. Add a theme to `Powers.Themes` with a new `ModelKind`.
+2. Add its powers to `Powers.List` with original names, regions, weights and multipliers.
+3. Add one model builder for the `ModelKind` in `src/client/UI/ItemModels.luau`.
+
+Rolling, saving, stacking, reveals and announcements need no changes.
+
+### Not built yet
+
+- An inventory page for powers. Powers equip automatically, and Equip Best fills every slot.
+- Auras, titles, the equip moment, skill keys, the index and the hub showcase.
+- Sounds for reveals. No audio asset IDs have been chosen.
