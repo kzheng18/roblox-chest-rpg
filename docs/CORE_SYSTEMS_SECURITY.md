@@ -2,6 +2,8 @@
 
 Status: implementation specification and static code review, 2026-09-29. These requirements extend Story 1; they are not a security certification or evidence that the controls are deployed. Existing behavior and gaps are recorded below. Proposed limits are project decisions to validate in staging.
 
+Client-validation implementation update: see [CLIENT_VALIDATION.md](CLIENT_VALIDATION.md) for changes, local regression evidence, and engine checks still required. The finding table below records the original review; the status notes identify which items have since been addressed locally.
+
 ## 1. Ownership and trust boundaries
 
 | System | Owns | Must never accept as authoritative |
@@ -156,12 +158,12 @@ Static review of the local working tree; no live exploit test or cloud persisten
 | Future-version protection missing | ProfileSchema.Migrate unconditionally replaces Version with 2 | Reject unsupported versions before mutation/autosave |
 | Corrupt values can become fresh defaults | Migrate returns template for non-table input and replaces invalid economy numbers | Distinguish known migration defaults from corruption; quarantine with recovery evidence |
 | Inventory validation incomplete | Weapon-count loop lacks finite checks; Validate checks containers, not catalog IDs/counts/ownership | Deep schema invariants, size/numeric caps, known-ID validation |
-| Chest debit precedes roll validation | ChestService subtracts Gold before checking the returned weapon | Stage/validate full candidate transaction before mutation |
+| Chest debit preceded roll validation | Original ChestService subtracted Gold before checking the returned weapon | Locally fixed: roll and count validated before debit/grant; durable transactions still open |
 | No duplicate-operation protocol | ChestService uses a 0.35-second cooldown, no durable receipt or sequence | Add serialized operation handling and replay contract |
 | Reward response precedes persistence | RequestSave schedules asynchronously; result is sent immediately | Revision-specific durable completion and pending UI |
 | Critical-save debounce can keep moving | Each RequestSave increments generation and invalidates the prior delayed call | Coordinator with max wait and save-backlog controls |
-| Invalid traffic bypasses action budgets | IntentGate validates before counting; GameService warns on each invalid request | Aggregate ingress budget and sampled rejection logs |
-| Physical chest eligibility incomplete | ChestService checks stored CurrentRegion/unlocks, no character distance | Enforce the selected interaction model server-side |
+| Invalid traffic bypassed action budgets | Original IntentGate validated before counting; GameService warned per invalid request | Locally fixed: player/server ingress buckets before validation and bounded warnings; real load testing still required |
+| Physical chest eligibility was incomplete | Original ChestService checked only stored CurrentRegion/unlocks | Locally fixed: living character, actual anchored chest, finite distance within 24 studs; movement anti-cheat remains separate |
 | Replication needs a privacy boundary | Gold/settings become public attributes; StateView.Delta accepts any dirty key | Explicit owner/public views and delta allowlist |
 | Monitoring/recovery not demonstrated | Diagnostics contains in-memory counters; DataService lacks operational subscriptions to global ProfileStore signals | Alerts, failure drills, restore procedure, and incident controls |
 

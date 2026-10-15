@@ -8,8 +8,17 @@ local ChestService = require(script.Parent.ChestService)
 local RegionService = require(script.Parent.RegionService)
 local IntentGate = require(script.Parent.Parent.Components.IntentGate)
 local Diagnostics = require(script.Parent.Parent.Components.Diagnostics)
+local Network = require(Shared.Config.Network)
 
 local GameService = {}
+local lastWarning = -math.huge
+
+local function warnBounded(message: string)
+	local now = os.clock()
+	if now - lastWarning < Network.WarningInterval then return end
+	lastWarning = now
+	warn(message)
+end
 
 local function dispatch(player: Player, action: string, payload: any)
 	if action == "Train" then
@@ -33,23 +42,43 @@ local function dispatch(player: Player, action: string, payload: any)
 	end
 end
 
+function GameService.Handle(player: Player, action: any, payload: any, ...: any)
+	if player.Parent ~= Players then return end
+	-- Trusted server prompts/playtests may use region strings. The remote handler
+	-- below rejects this legacy form before reaching this adapter.
+	if action == "OpenChest" and type(payload) == "string" then
+		local data = DataService.Get(player)
+		if data then payload = {RegionId = payload, Sequence = data.ChestSequence + 1} end
+	end
+	local accepted, reason = IntentGate.Accept(player, action, payload, nil, select("#", ...))
+	if not accepted then
+		Diagnostics.Intent(player, 0, false)
+		if reason ~= "rate limited" and reason ~= "server rate limited" then
+			warnBounded("[GameService] Rejected intent: " .. tostring(reason))
+		end
+		return
+	end
+	if not DataService.Get(player) then
+		Diagnostics.Intent(player, 0, false)
+		return
+	end
+	local started = os.clock()
+	local ok, err = pcall(dispatch, player, action, payload)
+	local elapsedMs = (os.clock() - started) * 1000
+	Diagnostics.Intent(player, elapsedMs, ok)
+	if not ok then
+		warnBounded(string.format("[GameService] %s failed: %s", action, tostring(err)))
+	end
+end
+
 function GameService.Start()
-	Remote.OnServerEvent:Connect(function(player: Player, action: any, payload: any)
-		local accepted, reason = IntentGate.Accept(player, action, payload)
-		if not accepted then
-			Diagnostics.Intent(player, 0, false)
-			if reason ~= "rate limited" then
-				warn(string.format("[GameService] Rejected %s intent: %s", player.Name, tostring(reason)))
-			end
+	Remote.OnServerEvent:Connect(function(player: Player, action: any, payload: any, ...: any)
+		if action == "OpenChest" and type(payload) ~= "table" then
+			-- Charge malformed/legacy remote traffic against ingress budgets.
+			IntentGate.Accept(player, action, payload)
 			return
 		end
-		local started = os.clock()
-		local ok, err = pcall(dispatch, player, action, payload)
-		local elapsedMs = (os.clock() - started) * 1000
-		Diagnostics.Intent(player, elapsedMs, true)
-		if not ok then
-			warn(string.format("[GameService] %s failed for %s: %s", tostring(action), player.Name, tostring(err)))
-		end
+		GameService.Handle(player, action, payload, ...)
 	end)
 
 	Players.PlayerRemoving:Connect(function(player)

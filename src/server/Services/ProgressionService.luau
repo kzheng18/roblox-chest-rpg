@@ -1,16 +1,17 @@
 --!strict
 local Shared = game.ReplicatedStorage.Shared
 local Economy = require(Shared.Config.Economy)
-local Weapons = require(Shared.Config.Weapons)
 local Progression = require(Shared.Util.Progression)
 local DataService = require(script.Parent.DataService)
+local RequestContext = require(script.Parent.Parent.Components.RequestContext)
+local PlayerService = require(script.Parent.PlayerService)
 
 local ProgressionService = {}
 local lastTrain: {[Player]: number} = {}
 
 function ProgressionService.Train(player: Player)
-	local data = DataService.Get(player)
-	if not data then return end
+	local data = RequestContext.GetData(player, "Train", nil)
+	if not data or not RequestContext.LivingRoot(player) then return end
 	local now = os.clock()
 	if now - (lastTrain[player] or 0) < Economy.TrainCooldown then return end
 	lastTrain[player] = now
@@ -20,8 +21,8 @@ function ProgressionService.Train(player: Player)
 end
 
 function ProgressionService.Equip(player: Player, weaponId: string)
-	local data = DataService.Get(player)
-	if not data or not Weapons.ById[weaponId] or (data.OwnedWeapons[weaponId] or 0) <= 0 then
+	local data = RequestContext.GetData(player, "EquipWeapon", weaponId)
+	if not data or not Progression.OwnsWeapon(data, weaponId) then
 		return
 	end
 	data.EquippedWeapon = weaponId
@@ -30,7 +31,7 @@ function ProgressionService.Equip(player: Player, weaponId: string)
 end
 
 function ProgressionService.EquipBest(player: Player)
-	local data = DataService.Get(player)
+	local data = RequestContext.GetData(player, "EquipBest", nil)
 	if not data then return end
 	local best = Progression.BestOwnedWeapon(data)
 	if best == "" then return end
@@ -40,7 +41,7 @@ function ProgressionService.EquipBest(player: Player)
 end
 
 function ProgressionService.Rebirth(player: Player)
-	local data = DataService.Get(player)
+	local data = RequestContext.GetData(player, "Rebirth", nil)
 	if not data or not Progression.ApplyRebirth(data) then return end
 	DataService.Touch(player, {
 		"Rebirths",
@@ -53,10 +54,11 @@ function ProgressionService.Rebirth(player: Player)
 		"GoldGain",
 	}, true)
 	DataService.RequestSave(player, "Rebirth")
+	PlayerService.Place(player)
 end
 
 function ProgressionService.UpdateSetting(player: Player, key: string, value: any)
-	local data = DataService.Get(player)
+	local data = RequestContext.GetData(player, "Setting", {Key = key, Value = value})
 	if not data then return end
 	if key == "RollAnimation" or key == "ReducedMotion" then
 		if type(value) ~= "boolean" then return end
@@ -64,6 +66,9 @@ function ProgressionService.UpdateSetting(player: Player, key: string, value: an
 	elseif key == "Volume" then
 		if type(value) ~= "number" then return end
 		data.Settings.Volume = math.clamp(value, 0, 1)
+	elseif key == "EffectsQuality" then
+		if value ~= "Auto" and value ~= "Low" and value ~= "High" then return end
+		data.Settings.EffectsQuality = value
 	else
 		return
 	end

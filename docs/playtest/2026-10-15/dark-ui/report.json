@@ -1,0 +1,661 @@
+{
+  "start": {
+    "enabled": true,
+    "objective": {
+      "exists": true,
+      "region": "VERDANT CROSSROADS",
+      "background": 0.14000000059604645,
+      "position": "144, 2",
+      "size": "837, 76"
+    },
+    "buttons": {
+      "Inventory": {
+        "visible": true,
+        "pos": "10, 80",
+        "exists": true,
+        "size": "46, 46"
+      },
+      "Settings": {
+        "visible": true,
+        "pos": "62, 132",
+        "exists": true,
+        "size": "46, 46"
+      },
+      "Regions": {
+        "visible": true,
+        "pos": "114, 80",
+        "exists": true,
+        "size": "46, 46"
+      },
+      "Rebirth": {
+        "visible": true,
+        "pos": "10, 132",
+        "exists": true,
+        "size": "46, 46"
+      },
+      "Chest": {
+        "visible": true,
+        "pos": "62, 80",
+        "exists": true,
+        "size": "46, 46"
+      }
+    },
+    "bodyCanvas": "685, 403",
+    "save": {
+      "exists": false
+    },
+    "overlayVisible": false,
+    "tabs": {
+      "Inventory": {
+        "selected": false,
+        "exists": true,
+        "size": "162, 49"
+      },
+      "Settings": {
+        "selected": false,
+        "exists": true,
+        "size": "162, 49"
+      },
+      "Regions": {
+        "selected": false,
+        "exists": true,
+        "size": "162, 49"
+      },
+      "Rebirth": {
+        "selected": false,
+        "exists": true,
+        "size": "162, 49"
+      },
+      "Chest": {
+        "selected": false,
+        "exists": true,
+        "size": "162, 49"
+      }
+    },
+    "bodyChildren": 1,
+    "viewport": "991, 539",
+    "bodySize": "685, 403",
+    "name": "rockypocky",
+    "labels": []
+  },
+  "hudScreenshot": "hud.jpg",
+  "pages": {
+    "Inventory": {
+      "activation": "Success",
+      "inspection": {
+        "enabled": true,
+        "objective": {
+          "exists": true,
+          "region": "VERDANT CROSSROADS",
+          "background": 0.14000000059604645,
+          "position": "144, 2",
+          "size": "1120, 76"
+        },
+        "buttons": {
+          "Inventory": {
+            "visible": true,
+            "pos": "10, 80",
+            "exists": true,
+            "size": "46, 46"
+          },
+          "Settings": {
+            "visible": true,
+            "pos": "62, 132",
+            "exists": true,
+            "size": "46, 46"
+          },
+          "Regions": {
+            "visible": true,
+            "pos": "114, 80",
+            "exists": true,
+            "size": "46, 46"
+          },
+          "Rebirth": {
+            "visible": true,
+            "pos": "10, 132",
+            "exists": true,
+            "size": "46, 46"
+          },
+          "Chest": {
+            "visible": true,
+            "pos": "62, 80",
+            "exists": true,
+            "size": "46, 46"
+          }
+        },
+        "bodyCanvas": "685, 434",
+        "bodySize": "685, 403",
+        "overlayVisible": true,
+        "tabs": {
+          "Inventory": {
+            "selected": true,
+            "exists": true,
+            "size": "162, 49"
+          },
+          "Settings": {
+            "selected": false,
+            "exists": true,
+            "size": "162, 49"
+          },
+          "Regions": {
+            "selected": false,
+            "exists": true,
+            "size": "162, 49"
+          },
+          "Rebirth": {
+            "selected": false,
+            "exists": true,
+            "size": "162, 49"
+          },
+          "Chest": {
+            "selected": false,
+            "exists": true,
+            "size": "162, 49"
+          }
+        },
+        "name": "rockypocky",
+        "bodyChildren": 6,
+        "viewport": "1274, 539",
+        "loaded": true,
+        "save": {
+          "exists": false
+        },
+        "labels": {
+          "1": "THE ARMORY",
+          "3": "CURRENTLY EQUIPPED",
+          "2": "Browse your treasure. Select a weapon to inspect it, then equip it.",
+          "5": "EQUIP BEST",
+          "4": "No weapon equipped",
+          "7": "0 WEAPONS",
+          "6": "SORT: POWER  >",
+          "9": "Open a treasure chest to find your first weapon.",
+          "8": "YOUR ADVENTURE STARTS HERE"
+        }
+      },
+      "screenshot": "page_inventory.jpg"
+    },
+    "Chest": {
+      "activation": "Success",
+      "inspection": {
+        "enabled": true,
+        "objective": {
+          "exists": true,
+          "region": "VERDANT CROSSROADS",
+          "background": 0.14000000059604645,
+          "position": "144, 2",
+          "size": "1120, 76"
+        },
+        "buttons": {
+          "Inventory": {
+            "visible": true,
+            "pos": "10, 80",
+            "exists": true,
+            "size": "46, 46"
+          },
+          "Settings": {
+            "visible": true,
+            "pos": "62, 132",
+            "exists": true,
+            "size": "46, 46"
+          },
+          "Regions": {
+            "visible": true,
+            "pos": "114, 80",
+            "exists": true,
+            "size": "46, 46"
+          },
+          "Rebirth": {
+            "visible": true,
+            "pos": "10, 132",
+            "exists": true,
+            "size": "46, 46"
+          },
+          "Chest": {
+            "visible": true,
+            "pos": "62, 80",
+            "exists": true,
+            "size": "46, 46"
+          }
+        },
+        "bodyCanvas": "685, 702",
+        "bodySize": "685, 403",
+        "overlayVisible": true,
+        "tabs": {
+          "Inventory": {
+            "selected": false,
+            "exists": true,
+            "size": "162, 49"
+          },
+          "Settings": {
+            "selected": false,
+            "exists": true,
+            "size": "162, 49"
+          },
+          "Regions": {
+            "selected": false,
+            "exists": true,
+            "size": "162, 49"
+          },
+          "Rebirth": {
+            "selected": false,
+            "exists": true,
+            "size": "162, 49"
+          },
+          "Chest": {
+            "selected": true,
+            "exists": true,
+            "size": "162, 49"
+          }
+        },
+        "name": "rockypocky",
+        "bodyChildren": 10,
+        "viewport": "1274, 539",
+        "loaded": true,
+        "save": {
+          "exists": false
+        },
+        "labels": {
+          "1": "Verdant Crossroads Treasure",
+          "3": "CHEST COST",
+          "2": "Find stronger weapons! Luck improves your live 1/N rates. Move near the chest to open it.",
+          "5": "Luck x1.00",
+          "4": "25 Gold",
+          "7": "Ironleaf Sword",
+          "6": "OPEN CHEST",
+          "9": "LIVE RATE",
+          "8": "Common  /  Sword",
+          "12": "Briar Hunter Bow",
+          "11": "x1.10",
+          "10": "1/1"
+        }
+      },
+      "screenshot": "page_chest.jpg"
+    },
+    "Regions": {
+      "activation": "Success",
+      "inspection": {
+        "enabled": true,
+        "objective": {
+          "exists": true,
+          "region": "VERDANT CROSSROADS",
+          "background": 0.14000000059604645,
+          "position": "144, 2",
+          "size": "1120, 76"
+        },
+        "buttons": {
+          "Inventory": {
+            "visible": true,
+            "pos": "10, 80",
+            "exists": true,
+            "size": "46, 46"
+          },
+          "Settings": {
+            "visible": true,
+            "pos": "62, 132",
+            "exists": true,
+            "size": "46, 46"
+          },
+          "Regions": {
+            "visible": true,
+            "pos": "114, 80",
+            "exists": true,
+            "size": "46, 46"
+          },
+          "Rebirth": {
+            "visible": true,
+            "pos": "10, 132",
+            "exists": true,
+            "size": "46, 46"
+          },
+          "Chest": {
+            "visible": true,
+            "pos": "62, 80",
+            "exists": true,
+            "size": "46, 46"
+          }
+        },
+        "bodyCanvas": "685, 502",
+        "bodySize": "685, 403",
+        "overlayVisible": true,
+        "tabs": {
+          "Inventory": {
+            "selected": false,
+            "exists": true,
+            "size": "162, 49"
+          },
+          "Settings": {
+            "selected": false,
+            "exists": true,
+            "size": "162, 49"
+          },
+          "Regions": {
+            "selected": true,
+            "exists": true,
+            "size": "162, 49"
+          },
+          "Rebirth": {
+            "selected": false,
+            "exists": true,
+            "size": "162, 49"
+          },
+          "Chest": {
+            "selected": false,
+            "exists": true,
+            "size": "162, 49"
+          }
+        },
+        "name": "rockypocky",
+        "bodyChildren": 6,
+        "viewport": "1274, 539",
+        "loaded": true,
+        "save": {
+          "exists": false
+        },
+        "labels": {
+          "1": "World Progression",
+          "3": "VERDANT CROSSROADS",
+          "2": "Your next milestone is Frostfall Kingdom. Reach its Power requirement to unlock travel.",
+          "5": "Starting region",
+          "4": "CURRENT",
+          "7": "YOU ARE HERE",
+          "6": "Travel available",
+          "9": "LOCKED",
+          "8": "FROSTFALL KINGDOM",
+          "12": "2.5K LEFT",
+          "11": "0% complete",
+          "10": "0 / 2.5K Power"
+        }
+      },
+      "screenshot": "page_regions.jpg"
+    },
+    "Rebirth": {
+      "activation": "Success",
+      "inspection": {
+        "enabled": true,
+        "objective": {
+          "exists": true,
+          "region": "VERDANT CROSSROADS",
+          "background": 0.14000000059604645,
+          "position": "144, 2",
+          "size": "1120, 76"
+        },
+        "buttons": {
+          "Inventory": {
+            "visible": true,
+            "pos": "10, 80",
+            "exists": true,
+            "size": "46, 46"
+          },
+          "Settings": {
+            "visible": true,
+            "pos": "62, 132",
+            "exists": true,
+            "size": "46, 46"
+          },
+          "Regions": {
+            "visible": true,
+            "pos": "114, 80",
+            "exists": true,
+            "size": "46, 46"
+          },
+          "Rebirth": {
+            "visible": true,
+            "pos": "10, 132",
+            "exists": true,
+            "size": "46, 46"
+          },
+          "Chest": {
+            "visible": true,
+            "pos": "62, 80",
+            "exists": true,
+            "size": "46, 46"
+          }
+        },
+        "bodyCanvas": "685, 438",
+        "bodySize": "685, 403",
+        "overlayVisible": true,
+        "tabs": {
+          "Inventory": {
+            "selected": false,
+            "exists": true,
+            "size": "162, 49"
+          },
+          "Settings": {
+            "selected": false,
+            "exists": true,
+            "size": "162, 49"
+          },
+          "Regions": {
+            "selected": false,
+            "exists": true,
+            "size": "162, 49"
+          },
+          "Rebirth": {
+            "selected": true,
+            "exists": true,
+            "size": "162, 49"
+          },
+          "Chest": {
+            "selected": false,
+            "exists": true,
+            "size": "162, 49"
+          }
+        },
+        "name": "rockypocky",
+        "bodyChildren": 5,
+        "viewport": "1274, 539",
+        "loaded": true,
+        "save": {
+          "exists": false
+        },
+        "labels": {
+          "1": "Rebirth",
+          "3": "REBIRTH 1",
+          "2": "Reset your run progression for permanent growth while keeping your weapon collection.",
+          "5": "0 / 20K Power",
+          "4": "0 completed",
+          "7": "20K POWER REMAINING",
+          "6": "0% complete",
+          "9": "+25% Power gain",
+          "8": "PERMANENT GAINS EACH REBIRTH",
+          "12": "Weapons stay. Run Power, Gold, and region access reset.",
+          "11": "+0.15 Luck",
+          "10": "+20% Gold gain"
+        }
+      },
+      "screenshot": "page_rebirth.jpg"
+    },
+    "Settings": {
+      "activation": "Success",
+      "inspection": {
+        "enabled": true,
+        "objective": {
+          "exists": true,
+          "region": "VERDANT CROSSROADS",
+          "background": 0.14000000059604645,
+          "position": "144, 2",
+          "size": "1120, 76"
+        },
+        "buttons": {
+          "Inventory": {
+            "visible": true,
+            "pos": "10, 80",
+            "exists": true,
+            "size": "46, 46"
+          },
+          "Settings": {
+            "visible": true,
+            "pos": "62, 132",
+            "exists": true,
+            "size": "46, 46"
+          },
+          "Regions": {
+            "visible": true,
+            "pos": "114, 80",
+            "exists": true,
+            "size": "46, 46"
+          },
+          "Rebirth": {
+            "visible": true,
+            "pos": "10, 132",
+            "exists": true,
+            "size": "46, 46"
+          },
+          "Chest": {
+            "visible": true,
+            "pos": "62, 80",
+            "exists": true,
+            "size": "46, 46"
+          }
+        },
+        "bodyCanvas": "685, 590",
+        "bodySize": "685, 403",
+        "overlayVisible": true,
+        "tabs": {
+          "Inventory": {
+            "selected": false,
+            "exists": true,
+            "size": "162, 49"
+          },
+          "Settings": {
+            "selected": true,
+            "exists": true,
+            "size": "162, 49"
+          },
+          "Regions": {
+            "selected": false,
+            "exists": true,
+            "size": "162, 49"
+          },
+          "Rebirth": {
+            "selected": false,
+            "exists": true,
+            "size": "162, 49"
+          },
+          "Chest": {
+            "selected": false,
+            "exists": true,
+            "size": "162, 49"
+          }
+        },
+        "name": "rockypocky",
+        "bodyChildren": 7,
+        "viewport": "1274, 539",
+        "loaded": true,
+        "save": {
+          "exists": false
+        },
+        "labels": {
+          "1": "Settings",
+          "3": "Chest reveal animation",
+          "2": "Tune presentation and accessibility. These preferences save with your profile.",
+          "5": "ON",
+          "4": "Show the rolling sequence before the server-selected reward appears.",
+          "7": "Shortens panel and reward motion while keeping gameplay feedback readable.",
+          "6": "Reduced motion",
+          "9": "Master volume",
+          "8": "OFF",
+          "12": "-",
+          "11": "Global audio preference for music, ambience, and effects.",
+          "10": "80%"
+        }
+      },
+      "screenshot": "page_settings.jpg"
+    }
+  },
+  "closeAction": "Success",
+  "closed": {
+    "enabled": true,
+    "objective": {
+      "exists": true,
+      "region": "VERDANT CROSSROADS",
+      "background": 0.14000000059604645,
+      "position": "144, 2",
+      "size": "1120, 76"
+    },
+    "buttons": {
+      "Inventory": {
+        "visible": true,
+        "pos": "10, 80",
+        "exists": true,
+        "size": "46, 46"
+      },
+      "Settings": {
+        "visible": true,
+        "pos": "62, 132",
+        "exists": true,
+        "size": "46, 46"
+      },
+      "Regions": {
+        "visible": true,
+        "pos": "114, 80",
+        "exists": true,
+        "size": "46, 46"
+      },
+      "Rebirth": {
+        "visible": true,
+        "pos": "10, 132",
+        "exists": true,
+        "size": "46, 46"
+      },
+      "Chest": {
+        "visible": true,
+        "pos": "62, 80",
+        "exists": true,
+        "size": "46, 46"
+      }
+    },
+    "bodyCanvas": "685, 590",
+    "bodySize": "685, 403",
+    "overlayVisible": false,
+    "tabs": {
+      "Inventory": {
+        "selected": false,
+        "exists": true,
+        "size": "162, 49"
+      },
+      "Settings": {
+        "selected": false,
+        "exists": true,
+        "size": "162, 49"
+      },
+      "Regions": {
+        "selected": false,
+        "exists": true,
+        "size": "162, 49"
+      },
+      "Rebirth": {
+        "selected": false,
+        "exists": true,
+        "size": "162, 49"
+      },
+      "Chest": {
+        "selected": false,
+        "exists": true,
+        "size": "162, 49"
+      }
+    },
+    "name": "rockypocky",
+    "bodyChildren": 7,
+    "viewport": "1274, 539",
+    "loaded": true,
+    "save": {
+      "exists": false
+    },
+    "labels": {
+      "1": "Settings",
+      "3": "Chest reveal animation",
+      "2": "Tune presentation and accessibility. These preferences save with your profile.",
+      "5": "ON",
+      "4": "Show the rolling sequence before the server-selected reward appears.",
+      "7": "Shortens panel and reward motion while keeping gameplay feedback readable.",
+      "6": "Reduced motion",
+      "9": "Master volume",
+      "8": "OFF",
+      "12": "-",
+      "11": "Global audio preference for music, ambience, and effects.",
+      "10": "80%"
+    }
+  },
+  "console": "es.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberBeginWork.new:3485 function beginWork\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:255\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:1977\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:1953\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:1896\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:915\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:860\nCorePackages.Packages._Index.Scheduler.Scheduler.Scheduler:320\nCorePackages.Packages._Index.Scheduler.Scheduler.Scheduler:268\nCorePackages.Packages._Index.Scheduler.Scheduler.forks.SchedulerHostConfig.default:260 function doWork\nCorePackages.Packages._Index.Scheduler.Scheduler.forks.SchedulerHostConfig.default:296 function performWorkUntilDeadline\n\n[Roblox][CorePackages.Packages._Index.UIBlox.UIBlox.Logger] [UIBlox - Warning] - FoundationProvider not found. Please ensure that the FoundationProvider is present in the component tree.\nCorePackages.Packages._Index.UIBlox.UIBlox.App.Style.AppStyleProvider:178 function AppStyleProvider\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberHooks.new:3196 function renderWithHooks\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberBeginWork.new:209 function renderWithHooks\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberBeginWork.new:1577 function mountIndeterminateComponent\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberBeginWork.new:3485 function beginWork\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:255\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:1977\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:1953\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:1896\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:915\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:860\nCorePackages.Packages._Index.Scheduler.Scheduler.Scheduler:320\nCorePackages.Packages._Index.Scheduler.Scheduler.Scheduler:268\nCorePackages.Packages._Index.Scheduler.Scheduler.forks.SchedulerHostConfig.default:260 function doWork\nCorePackages.Packages._Index.Scheduler.Scheduler.forks.SchedulerHostConfig.default:296 function performWorkUntilDeadline\n\n[Roblox][CorePackages.Packages._Index.UIBlox.UIBlox.Logger] [UIBlox - Warning] - FoundationProvider not found. Please ensure that the FoundationProvider is present in the component tree.\nCorePackages.Packages._Index.UIBlox.UIBlox.App.Style.AppStyleProvider:178 function AppStyleProvider\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberHooks.new:3196 function renderWithHooks\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberBeginWork.new:209 function renderWithHooks\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberBeginWork.new:1577 function mountIndeterminateComponent\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberBeginWork.new:3485 function beginWork\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:255\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:1977\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:1953\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:1896\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:915\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:860\nCorePackages.Packages._Index.Scheduler.Scheduler.Scheduler:320\nCorePackages.Packages._Index.Scheduler.Scheduler.Scheduler:268\nCorePackages.Packages._Index.Scheduler.Scheduler.forks.SchedulerHostConfig.default:260 function doWork\nCorePackages.Packages._Index.Scheduler.Scheduler.forks.SchedulerHostConfig.default:296 function performWorkUntilDeadline\n\n[Roblox][CorePackages.Packages._Index.UIBlox.UIBlox.Logger] [UIBlox - Warning] - FoundationProvider not found. Please ensure that the FoundationProvider is present in the component tree.\nCorePackages.Packages._Index.UIBlox.UIBlox.App.Style.AppStyleProvider:178 function AppStyleProvider\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberHooks.new:3196 function renderWithHooks\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberBeginWork.new:209 function renderWithHooks\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberBeginWork.new:1577 function mountIndeterminateComponent\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberBeginWork.new:3485 function beginWork\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:255\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:1977\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:1953\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:1896\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:915\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:860\nCorePackages.Packages._Index.Scheduler.Scheduler.Scheduler:320\nCorePackages.Packages._Index.Scheduler.Scheduler.Scheduler:268\nCorePackages.Packages._Index.Scheduler.Scheduler.forks.SchedulerHostConfig.default:260 function doWork\nCorePackages.Packages._Index.Scheduler.Scheduler.forks.SchedulerHostConfig.default:296 function performWorkUntilDeadline\n\n[Roblox][CorePackages.Packages._Index.UIBlox.UIBlox.Logger] [UIBlox - Warning] - FoundationProvider not found. Please ensure that the FoundationProvider is present in the component tree.\nCorePackages.Packages._Index.UIBlox.UIBlox.App.Style.AppStyleProvider:178 function AppStyleProvider\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberHooks.new:3196 function renderWithHooks\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberBeginWork.new:209 function renderWithHooks\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberBeginWork.new:1577 function mountIndeterminateComponent\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberBeginWork.new:3485 function beginWork\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:255\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:1977\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:1953\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:1896\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:915\nCorePackages.Packages._Index.ReactReconciler.ReactReconciler.ReactFiberWorkLoop.new:860\nCorePackages.Packages._Index.Scheduler.Scheduler.Scheduler:320\nCorePackages.Packages._Index.Scheduler.Scheduler.Scheduler:268\nCorePackages.Packages._Index.Scheduler.Scheduler.forks.SchedulerHostConfig.default:260 function doWork\nCorePackages.Packages._Index.Scheduler.Scheduler.forks.SchedulerHostConfig.default:296 function performWorkUntilDeadline\n"
+}

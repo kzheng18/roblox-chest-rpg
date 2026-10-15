@@ -1,0 +1,24 @@
+{
+  "Success": true,
+  "Result": {
+    "Persistence": "Mock only; no cloud save assertion",
+    "Passed": 15,
+    "Checks": [
+      "player has living Humanoid and root",
+      "training increases Power and Gold",
+      "nearby chest debits cost and grants weapon",
+      "equipped weapon belongs to player",
+      "malformed intent grants nothing",
+      "locked travel rejected",
+      "distant chest rejected without debit",
+      "region unlock and arrival",
+      "region respawn selected",
+      "higher-region chest works",
+      "Rebirth resets run and increments permanent count",
+      "Rebirth returns avatar to starting region",
+      "valid settings change",
+      "non-finite setting rejected",
+      "death respawns a controllable player"
+    ]
+  }
+}

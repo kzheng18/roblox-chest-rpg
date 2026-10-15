@@ -3,11 +3,15 @@ export type Settings = {
 	RollAnimation: boolean,
 	ReducedMotion: boolean,
 	Volume: number,
+	EffectsQuality: string,
 }
 
 export type PlayerData = {
 	Version: number,
 	Revision: number,
+	OwnerUserId: number,
+	ChestSequence: number,
+	LastChestReceipt: {Sequence: number, Region: string, Id: string, RateN: number, Revision: number?}?,
 	Power: number,
 	Gold: number,
 	Luck: number,

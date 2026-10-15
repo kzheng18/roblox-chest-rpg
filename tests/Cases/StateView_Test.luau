@@ -34,4 +34,12 @@ return function(t: any)
 		local equipped = StateView.Delta(data, {PowerGain = true}).PowerGain
 		t.expect.truthy(equipped > base)
 	end)
+	t.test("owner binding and transaction receipts never leak into state", function()
+		local data = Progression.New(); data.OwnerUserId = 123
+		local snapshot = StateView.Snapshot(data)
+		local delta = StateView.Delta(data, {OwnerUserId = true, LastChestReceipt = true, ChestSequence = true})
+		t.expect.equal(snapshot.OwnerUserId, nil); t.expect.equal(snapshot.LastChestReceipt, nil)
+		t.expect.equal(delta.OwnerUserId, nil); t.expect.equal(delta.LastChestReceipt, nil)
+		t.expect.equal(delta.ChestSequence, 0)
+	end)
 end

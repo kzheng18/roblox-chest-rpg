@@ -22,7 +22,7 @@ return function(t: any)
 			t.expect.truthy(policy)
 			t.expect.truthy(policy.Window > 0)
 			t.expect.truthy(policy.Burst > 0)
-			t.expect.truthy(policy.Payload == "none" or policy.Payload == "string" or policy.Payload == "setting")
+			t.expect.truthy(policy.Payload == "none" or policy.Payload == "string" or policy.Payload == "setting" or policy.Payload == "chest")
 		end
 	end)
 

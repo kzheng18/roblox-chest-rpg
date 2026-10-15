@@ -34,7 +34,9 @@ Gain Power
 
 ### Visual and UX direction
 
-Every screen and interaction should follow the same reference mix:
+**September 30 update:** the user's supplied colorful Roblox HUD screenshot is the current direction for UI styling: bold outlined lettering, bright square icon buttons, dark borders, clear progress bars and prominent actions. Use original icons and panels. The prototype implements this direction; see [UI style and verification](UI_STYLE.md). The earlier reference mix below remains guidance for fantasy identity, inventory hierarchy and usability rather than a requirement for muted colors or restrained frames.
+
+Earlier hierarchy and feel references:
 
 - **60% Clover RPG fantasy interface:** fantasy-world mood, illustrated RPG framing, immersive menus, strong world identity.
 - **25% Terraria inventory/readability:** compact slot grids, instantly readable icons, clear rarity treatment, dense information without clutter.
@@ -46,7 +48,7 @@ These are references for hierarchy, pacing, and feel only. All art, panels, icon
 
 The percentages express the intended creative balance, not a measurable asset quota or a claim about those games' exact interfaces.
 
-- **Fantasy identity (60%):** original frames, restrained material textures, coherent typography, and world-themed accents. Decoration must leave text and controls readable.
+- **Fantasy identity (60%):** original frames, coherent typography, recognizable fantasy icons and world-themed accents. The current bright HUD treatment must leave text and controls readable.
 - **Inventory/readability (25%):** consistent slots, recognizable weapon silhouettes, concise stat comparisons, and explicit selected/equipped states. Rarity is labeled as well as colored.
 - **Roblox RPG usability (15%):** clear back/close actions, touch-friendly controls, controller focus, and prompts appropriate to the active input device. Essential information cannot require hovering.
 - Verify the HUD, region gate, chest panel, inventory, Rebirth panel, and combat controls on desktop and a phone-sized viewport. Test controller navigation on each interactive screen.

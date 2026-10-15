@@ -4,6 +4,9 @@ local Progression = require(Shared.Util.Progression)
 local Types = require(Shared.Types)
 
 local StateView = {}
+local publicFields = {Power = true, Gold = true, Luck = true, Rebirths = true,
+	OwnedWeapons = true, EquippedWeapon = true, UnlockedRegions = true, CurrentRegion = true,
+	Settings = true, PowerGain = true, GoldGain = true, ChestSequence = true}
 
 local function valueFor(data: Types.PlayerData, key: string): any
 	if key == "Luck" then return Progression.Luck(data) end
@@ -15,6 +18,7 @@ end
 function StateView.Snapshot(data: Types.PlayerData): {[string]: any}
 	return {
 		Revision = data.Revision,
+		ChestSequence = data.ChestSequence,
 		Power = data.Power,
 		Gold = data.Gold,
 		Luck = Progression.Luck(data),
@@ -31,7 +35,9 @@ end
 
 function StateView.Delta(data: Types.PlayerData, dirty: {[string]: boolean}): {[string]: any}
 	local changes = {}
-	for key in dirty do changes[key] = valueFor(data, key) end
+	for key in dirty do
+		if publicFields[key] then changes[key] = valueFor(data, key) end
+	end
 	return changes
 end
 

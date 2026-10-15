@@ -1,0 +1,44 @@
+{
+  "environment": "Luau 0.742; production code with Roblox/ProfileStore I/O doubles",
+  "studio_bridge_state": "Place is not open",
+  "live_studio_verified": false,
+  "cloud_persistence_verified": false,
+  "hardware_240fps_verified": false,
+  "checks": {
+    "regression": {
+      "exit_code": 0,
+      "output": "PASS 240 FPS frame budget is measured without frame-rate assumptions\nPASS frame spikes and reset remain observable\nPASS per-action burst is bounded and tokens refill gradually\nPASS malformed and mixed action spam consumes a shared player budget\nPASS extra arguments are rejected and consume ingress budget\nPASS one abusive player does not exhaust the server budget\nPASS many players still have a bounded aggregate server budget\nPASS cleanup discards player buckets\nPASS clock reversal does not create tokens\nPASS unknown actions are rejected\nPASS payloadless intents reject supplied payloads\nPASS string intents enforce shape and size\nPASS boolean settings require booleans\nPASS volume setting rejects invalid numeric ranges\nPASS unknown settings are rejected\nPASS chest requests require bounded sequence and reject owner selection\nPASS effects settings cannot change gameplay or accept arbitrary values\nPASS settings reject surplus fields and nested or cyclic values\nPASS replication target is twenty hertz\nPASS all gameplay intents have bounded policies\nPASS high frequency train budget still has a hard ceiling\nPASS slow intent diagnostic threshold is frame-safe\nPASS new profile uses current schema defaults\nPASS v1 profile derives persisted luck from rebirths\nPASS malformed progression cannot overwrite a save with defaults\nPASS missing and invalid settings are repaired\nPASS invalid weapon counts stop migration rather than discard items\nPASS migration does not mutate source tables\nPASS migrated profiles pass validation\nPASS legacy inventory and retired IDs survive ownership migration\nPASS profiles have independent inventory settings and receipt containers\nPASS future schema, cyclic inventory and non-finite counts fail closed\nPASS rebirth applies permanent bonuses and resets run state\nPASS rebirth is rejected below requirement\nPASS persisted luck drives current luck\nPASS best owned weapon uses highest multiplier\nPASS region gate follows configured power\nPASS rarity reciprocal odds preserve common and rare floors\nPASS formats rarity as one in N\nPASS normalizes non-integer rates\nPASS recovery restores archived inventory without mutating active data\nPASS recovery rejects another player's archive\nPASS legacy archives preserve items and acquire the correct owner\nPASS continuous purchases cannot postpone the first checkpoint\nPASS stale acknowledgement never claims newer inventory was saved\nPASS new critical rewards during a save retain their checkpoint\nPASS save timeout retries with bounded backoff and recovers\nPASS no write budget delays safely without claiming saved\nPASS departed session ignores late saves and queued checkpoints\nPASS future acknowledgement cannot mark unsaved state durable\nPASS snapshot includes authoritative derived values\nPASS delta includes only dirty fields\nPASS power gain delta reflects equipment changes\nPASS owner binding and transaction receipts never leak into state\nPASS valid nearby chest spends once and grants an owned catalog item\nPASS chest spam within cooldown cannot award extra items\nPASS distant chest request leaves economy unchanged\nPASS dead and unanchored chest interactions fail closed\nPASS invalid character coordinates and health cannot bypass proximity\nPASS locked or non-current region cannot supply chest rewards\nPASS unknown chest and empty server loot pool never consume Gold\nPASS insufficient Gold and invalid balances cannot buy\nPASS loading or ended profiles and departed players cannot mutate\nPASS unowned equipment is rejected but valid ownership works\nPASS non-finite and fractional weapon counts do not confer ownership\nPASS spoofing replicated attributes cannot override authoritative state\nPASS settings validate within the service as well as at ingress\nPASS spoofed identity and extra remote arguments cannot select another profile\nPASS request flooding produces bounded warnings\nPASS living character is required for training and region travel\nPASS travel still requires an unlocked region and rebirth requires Power\nPASS 100 delayed network retries purchase only one item\nPASS older sequences stay rejected after later purchases and migration\nPASS failed purchase does not consume the sequence or create a receipt\nPASS skipped sequence cannot buy and rebirth cannot reset receipts\nPASS one player cannot equip or mutate another player's inventory\nPASS actual remote entry rejects legacy requests and spoofed extra arguments\nPASS training cadence is identical at 30, 60, 144 and 240 render FPS\nPASS linear map classifies seams and excludes off-map coordinates\nPASS walking into a locked region returns before the first locked gate\nPASS unlocked walking updates region without teleporting or granting rewards\nPASS linear progression rejects skipping an earlier unlock\nPASS already-present avatars acquire placement and death handling\nPASS profile readiness gates initial avatar spawn\nPASS death schedules one respawn at the current region\nPASS region reset updates physical arrival and respawn\nPASS leaving or losing a profile cancels pending respawn\nPASS failed character loading retries with a bound\nSUMMARY: 88 passed, 0 failed\n",
+      "errors": ""
+    },
+    "persistence_wiring": {
+      "exit_code": 0,
+      "output": "PASS autosave is always configured at sixty seconds\nPASS live sessions cannot silently fall back to an unsaved mock profile\nPASS actual DataService isolates two players and persists ownership\nPASS owner mismatch cannot load another inventory or replace it with defaults\nPASS competing sessions cannot acquire the same player's inventory\nPASS corrupt inventory is preserved for recovery instead of silently emptied\nPASS legacy migration retains items and queues an owner-bound checkpoint\nPASS ordinary progression autosaves without a manual save request\nPASS delayed save only acknowledges its captured revision\nPASS failed checkpoints retry and recover automatically\nPASS budget exhaustion queues instead of writing or claiming saved\nPASS departure saves final inventory and revokes access\nPASS lost profile session immediately removes progression authority\nPASS snapshot goes only to its owner and rejects departed players\nSUMMARY: 14 passed, 0 failed\n",
+      "errors": ""
+    },
+    "effects_controller": {
+      "exit_code": 0,
+      "output": "PASS desktop Auto retains authored effects\nPASS Low reduces owned effects and High restores exact originals\nPASS Auto follows mobile and user graphics preferences\nPASS streamed effects inherit the current quality\nPASS large quality changes yield in bounded batches\nPASS render sampling never changes inventory or sends gameplay events\nPASS starting twice does not install duplicate render samplers\nSUMMARY: 7 passed, 0 failed\n",
+      "errors": ""
+    },
+    "model_audit": {
+      "exit_code": 0,
+      "output": "PASS packaged model audit: 55 JSON-only modules; no executable model scripts\n",
+      "errors": ""
+    },
+    "luau_compile": {
+      "files": 61,
+      "failures": []
+    },
+    "rojo_build": {
+      "exit_code": 0,
+      "output": "Building project 'ChestRPG'\nBuilt project to ChestRPG.rbxlx\n",
+      "errors": ""
+    },
+    "whitespace": {
+      "exit_code": 0,
+      "output": "",
+      "errors": ""
+    }
+  },
+  "build_sha256": "76f8264b56816544b180f1a1e850eaed16fc1008b67bc3368b10ff5c7f4b68a8"
+}

@@ -1,0 +1,60 @@
+{
+  "models": [
+    {
+      "id": "ember_ash_sword",
+      "triangles": 5238,
+      "parts": 4
+    },
+    {
+      "id": "ember_infernal",
+      "triangles": 5918,
+      "parts": 4
+    },
+    {
+      "id": "ember_sunbreaker",
+      "triangles": 5846,
+      "parts": 4
+    },
+    {
+      "id": "exclusive_azure_oath",
+      "triangles": 6178,
+      "parts": 4
+    },
+    {
+      "id": "frost_aurora",
+      "triangles": 5846,
+      "parts": 4
+    },
+    {
+      "id": "frost_sovereign",
+      "triangles": 6230,
+      "parts": 4
+    },
+    {
+      "id": "frost_steel_saber",
+      "triangles": 5206,
+      "parts": 4
+    },
+    {
+      "id": "frost_winterfang",
+      "triangles": 5918,
+      "parts": 4
+    },
+    {
+      "id": "verdant_clover_blade",
+      "triangles": 5918,
+      "parts": 4
+    },
+    {
+      "id": "verdant_crownblade",
+      "triangles": 5846,
+      "parts": 4
+    },
+    {
+      "id": "verdant_iron_sword",
+      "triangles": 5206,
+      "parts": 4
+    }
+  ],
+  "result": "PASS"
+}

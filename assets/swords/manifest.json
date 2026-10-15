@@ -1,0 +1,101 @@
+[
+  {
+    "id": "verdant_iron_sword",
+    "name": "Ironleaf Sword",
+    "tier": "Common",
+    "triangles": 5206,
+    "parts": 4,
+    "boundsHeight": 4.99,
+    "exclusive": false
+  },
+  {
+    "id": "verdant_clover_blade",
+    "name": "Clover Greatblade",
+    "tier": "Epic",
+    "triangles": 5918,
+    "parts": 4,
+    "boundsHeight": 5.99,
+    "exclusive": false
+  },
+  {
+    "id": "verdant_crownblade",
+    "name": "Verdant Crownblade",
+    "tier": "Legendary",
+    "triangles": 5846,
+    "parts": 4,
+    "boundsHeight": 5.84,
+    "exclusive": false
+  },
+  {
+    "id": "frost_steel_saber",
+    "name": "Froststeel Saber",
+    "tier": "Common",
+    "triangles": 5206,
+    "parts": 4,
+    "boundsHeight": 5.24,
+    "exclusive": false
+  },
+  {
+    "id": "frost_winterfang",
+    "name": "Winterfang",
+    "tier": "Epic",
+    "triangles": 5918,
+    "parts": 4,
+    "boundsHeight": 6.04,
+    "exclusive": false
+  },
+  {
+    "id": "frost_aurora",
+    "name": "Aurora Edge",
+    "tier": "Legendary",
+    "triangles": 5846,
+    "parts": 4,
+    "boundsHeight": 5.74,
+    "exclusive": false
+  },
+  {
+    "id": "frost_sovereign",
+    "name": "Frost Sovereign",
+    "tier": "Mythic",
+    "triangles": 6230,
+    "parts": 4,
+    "boundsHeight": 6.49,
+    "exclusive": false
+  },
+  {
+    "id": "ember_ash_sword",
+    "name": "Ashforged Sword",
+    "tier": "Common",
+    "triangles": 5238,
+    "parts": 4,
+    "boundsHeight": 5.04,
+    "exclusive": false
+  },
+  {
+    "id": "ember_infernal",
+    "name": "Infernal Greatsword",
+    "tier": "Epic",
+    "triangles": 5918,
+    "parts": 4,
+    "boundsHeight": 6.19,
+    "exclusive": false
+  },
+  {
+    "id": "ember_sunbreaker",
+    "name": "Sunbreaker",
+    "tier": "Legendary",
+    "triangles": 5846,
+    "parts": 4,
+    "boundsHeight": 6.19,
+    "exclusive": false
+  },
+  {
+    "id": "exclusive_azure_oath",
+    "name": "Oath of the Azure Crown",
+    "tier": "Exclusive",
+    "triangles": 6178,
+    "parts": 4,
+    "boundsHeight": 6.19,
+    "exclusive": true
+  }
+]

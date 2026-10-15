@@ -20,9 +20,15 @@ function Progression.Luck(data: Types.PlayerData): number
 	return math.max(1, data.Luck)
 end
 
+function Progression.OwnsWeapon(data: Types.PlayerData, weaponId: string): boolean
+	local count = data.OwnedWeapons[weaponId]
+	return Weapons.ById[weaponId] ~= nil and type(count) == "number"
+		and count == count and count > 0 and count <= 2^53 - 1 and count % 1 == 0
+end
+
 function Progression.WeaponMultiplier(data: Types.PlayerData): number
 	local weapon = Weapons.ById[data.EquippedWeapon]
-	return if weapon then weapon.PowerMultiplier else 1
+	return if weapon and Progression.OwnsWeapon(data, weapon.Id) then weapon.PowerMultiplier else 1
 end
 
 function Progression.PowerGain(data: Types.PlayerData): number
@@ -66,14 +72,19 @@ function Progression.CanUnlockRegion(data: Types.PlayerData, regionId: string): 
 	if data.Power < region.RequiredPower then
 		return false, "Need more Power"
 	end
+	for index, candidate in Regions.List do
+		if candidate.Id == regionId and index > 1 and data.UnlockedRegions[Regions.List[index - 1].Id] ~= true then
+			return false, "Unlock the previous region first"
+		end
+	end
 	return true
 end
 
 function Progression.BestOwnedWeapon(data: Types.PlayerData): string
 	local bestId = ""
 	local bestMultiplier = 1
-	for weaponId, count in data.OwnedWeapons do
-		if count > 0 then
+	for weaponId in data.OwnedWeapons do
+		if Progression.OwnsWeapon(data, weaponId) then
 			local weapon = Weapons.ById[weaponId]
 			if weapon and weapon.PowerMultiplier > bestMultiplier then
 				bestId = weaponId

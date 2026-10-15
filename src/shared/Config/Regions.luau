@@ -22,7 +22,7 @@ local Regions: {Region} = {
 		Name = "Frostfall Kingdom",
 		RequiredPower = 2_500,
 		ChestCost = 250,
-		Center = Vector3.new(420, 0, 0),
+		Center = Vector3.new(0, 0, -300),
 		Accent = Color3.fromRGB(117, 197, 255),
 	},
 	{
@@ -30,7 +30,7 @@ local Regions: {Region} = {
 		Name = "Emberreach Dominion",
 		RequiredPower = 12_000,
 		ChestCost = 1_250,
-		Center = Vector3.new(840, 0, 0),
+		Center = Vector3.new(0, 0, -560),
 		Accent = Color3.fromRGB(255, 126, 73),
 	},
 }
@@ -44,4 +44,3 @@ return {
 	List = Regions,
 	ById = byId,
 }
-

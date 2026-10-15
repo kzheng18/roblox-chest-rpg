@@ -1,10 +1,15 @@
 --!strict
 return {
+	MaxActionLength = 32,
+	Ingress = {Window = 1, Burst = 30},
+	ServerIngress = {Window = 1, Burst = 600},
+	WarningInterval = 10,
+	ChestInteractionRadius = 24,
 	ReplicationInterval = 1 / 20,
 	SlowIntentMilliseconds = 12,
 	Policies = {
 		Train = {Window = 1, Burst = 9, Payload = "none"},
-		OpenChest = {Window = 1, Burst = 4, Payload = "string"},
+		OpenChest = {Window = 1, Burst = 4, Payload = "chest"},
 		UnlockRegion = {Window = 2, Burst = 4, Payload = "string"},
 		TravelRegion = {Window = 1, Burst = 6, Payload = "string"},
 		EquipWeapon = {Window = 1, Burst = 8, Payload = "string"},
@@ -14,4 +19,3 @@ return {
 		RequestState = {Window = 3, Burst = 3, Payload = "none"},
 	},
 }
-

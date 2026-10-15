@@ -1,0 +1,41 @@
+{
+  "Success": true,
+  "Result": {
+    "Persistence": "Mock only",
+    "Passed": 32,
+    "Checks": [
+      "current linear layout",
+      "verdant has chest, road and encounters",
+      "frostfall has chest, road and encounters",
+      "emberreach has chest, road and encounters",
+      "one starting base for the entire road",
+      "verdant walkable: chest",
+      "verdant walkable: boss clearing",
+      "verdant walkable: end of region",
+      "verdant walkable: sell",
+      "verdant walkable: upgrade",
+      "frostfall walkable: chest",
+      "frostfall walkable: boss clearing",
+      "frostfall walkable: end of region",
+      "frostfall joins the previous region with no gap",
+      "frostfall gateway has a continuous walking path",
+      "emberreach walkable: chest",
+      "emberreach walkable: boss clearing",
+      "emberreach walkable: end of region",
+      "emberreach joins the previous region with no gap",
+      "emberreach gateway has a continuous walking path",
+      "avatar walks from starting base to chest",
+      "locked walking is returned before Frostfall",
+      "cannot skip the middle region",
+      "frostfall unlocks at its requirement",
+      "frostfall walking updates current region",
+      "frostfall crossing does not teleport to waypoint",
+      "frostfall walking selects its respawn",
+      "emberreach unlocks at its requirement",
+      "emberreach walking updates current region",
+      "emberreach crossing does not teleport to waypoint",
+      "emberreach walking selects its respawn",
+      "walking backward returns to Frostfall naturally"
+    ]
+  }
+}

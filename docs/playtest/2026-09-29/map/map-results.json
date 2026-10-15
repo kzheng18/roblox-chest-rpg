@@ -1,0 +1,36 @@
+{
+  "Success": true,
+  "Result": {
+    "Passed": 28,
+    "Checks": [
+      "one current map",
+      "verdant has a hub, field and chest",
+      "verdant has sell and upgrade stations",
+      "verdant has four encounter markers and a boss marker",
+      "frostfall has a hub, field and chest",
+      "frostfall has sell and upgrade stations",
+      "frostfall has four encounter markers and a boss marker",
+      "emberreach has a hub, field and chest",
+      "emberreach has sell and upgrade stations",
+      "emberreach has four encounter markers and a boss marker",
+      "verdant walkable: sell approach",
+      "verdant walkable: upgrade approach",
+      "verdant walkable: field entrance",
+      "verdant walkable: chest approach",
+      "verdant walkable: boss clearing",
+      "verdant walkable: next region gate",
+      "frostfall walkable: sell approach",
+      "frostfall walkable: upgrade approach",
+      "frostfall walkable: field entrance",
+      "frostfall walkable: chest approach",
+      "frostfall walkable: boss clearing",
+      "frostfall walkable: next region gate",
+      "emberreach walkable: sell approach",
+      "emberreach walkable: upgrade approach",
+      "emberreach walkable: field entrance",
+      "emberreach walkable: chest approach",
+      "emberreach walkable: boss clearing",
+      "avatar walks from base to chest without jumping"
+    ]
+  }
+}

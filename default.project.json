@@ -20,6 +20,9 @@
       }
     },
     "ServerStorage": {
+      "SwordGeometry": {
+        "$path": "src/assets/SwordGeometry.rbxmx"
+      },
       "UnitTest": {
         "$path": "tests"
       }

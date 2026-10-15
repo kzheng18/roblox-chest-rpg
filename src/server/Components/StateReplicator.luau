@@ -20,6 +20,9 @@ local function updateAttributes(player: Player, data: any, dirty: {[string]: boo
 	if wants("Luck") then player:SetAttribute("Luck", Progression.Luck(data)) end
 	if wants("Rebirths") then player:SetAttribute("Rebirths", data.Rebirths) end
 	if wants("EquippedWeapon") then player:SetAttribute("EquippedWeapon", data.EquippedWeapon) end
+	if wants("OwnedWeapons") or wants("EquippedWeapon") then
+		player:SetAttribute("EquipmentRevision", (player:GetAttribute("EquipmentRevision") or 0) + 1)
+	end
 	if wants("CurrentRegion") then player:SetAttribute("CurrentRegion", data.CurrentRegion) end
 	if wants("PowerGain") then player:SetAttribute("PowerGain", Progression.PowerGain(data)) end
 	if wants("GoldGain") then player:SetAttribute("GoldGain", Progression.GoldGain(data)) end
@@ -27,6 +30,7 @@ local function updateAttributes(player: Player, data: any, dirty: {[string]: boo
 		player:SetAttribute("RollAnimation", data.Settings.RollAnimation)
 		player:SetAttribute("ReducedMotion", data.Settings.ReducedMotion)
 		player:SetAttribute("Volume", data.Settings.Volume)
+		player:SetAttribute("EffectsQuality", data.Settings.EffectsQuality)
 	end
 	local stats = player:FindFirstChild("leaderstats")
 	if stats then

@@ -2,92 +2,106 @@
 local Shared = script.Parent.Parent
 local Economy = require(Shared.Config.Economy)
 local Types = require(Shared.Types)
-
 local ProfileSchema = {}
-ProfileSchema.Version = 2
+ProfileSchema.Version = 3
+local MAX_INTEGER = 2 ^ 53 - 1
 
-local function copy(value: any): any
-	if type(value) ~= "table" then return value end
-	local result = {}
-	for key, child in value do result[key] = copy(child) end
+local function finite(value: any): boolean
+	return type(value) == "number" and value == value and math.abs(value) < math.huge
+end
+local function integer(value: any, minimum: number): boolean
+	return finite(value) and value >= minimum and value <= MAX_INTEGER and value % 1 == 0
+end
+local function identifier(value: any): boolean
+	return type(value) == "string" and #value > 0 and #value <= 80
+end
+local function dictionary(raw: any, inventory: boolean): any
+	assert(type(raw) == "table", "Invalid persisted inventory/region container")
+	local result, size = {}, 0
+	for id, value in raw do
+		size += 1
+		assert(size <= 512 and identifier(id), "Invalid persisted inventory/region identifier")
+		assert(if inventory then integer(value, 1) else type(value) == "boolean", "Invalid persisted inventory/region value")
+		-- Retired IDs survive migrations, but confer no usable catalog ownership.
+		result[id] = value
+	end
 	return result
 end
 
 function ProfileSchema.New(): Types.PlayerData
 	return {
-		Version = ProfileSchema.Version,
-		Revision = 0,
-		Power = 0,
-		Gold = Economy.StartingGold,
-		Luck = 1,
-		Rebirths = 0,
-		OwnedWeapons = {},
-		EquippedWeapon = "",
-		UnlockedRegions = {verdant = true},
-		CurrentRegion = "verdant",
-		Settings = {
-			RollAnimation = true,
-			ReducedMotion = false,
-			Volume = 0.8,
-		},
+		Version = ProfileSchema.Version, Revision = 0, OwnerUserId = 0,
+		ChestSequence = 0, LastChestReceipt = nil,
+		Power = 0, Gold = Economy.StartingGold, Luck = 1, Rebirths = 0,
+		OwnedWeapons = {}, EquippedWeapon = "",
+		UnlockedRegions = {verdant = true}, CurrentRegion = "verdant",
+		Settings = {RollAnimation = true, ReducedMotion = false, Volume = 0.8, EffectsQuality = "Auto"},
 	}
 end
 
-local function finiteNumber(value: any, fallback: number, minimum: number?): number
-	if type(value) ~= "number" or value ~= value or math.abs(value) == math.huge then return fallback end
-	return if minimum then math.max(minimum, value) else value
-end
-
 function ProfileSchema.Migrate(raw: any): Types.PlayerData
-	local template = ProfileSchema.New()
-	if type(raw) ~= "table" then return template end
-	local data = copy(raw)
-	local sourceVersion = if type(data.Version) == "number" then data.Version else 0
-
-	data.Power = finiteNumber(data.Power, 0, 0)
-	data.Gold = finiteNumber(data.Gold, Economy.StartingGold, 0)
-	data.Rebirths = math.floor(finiteNumber(data.Rebirths, 0, 0))
-	data.Revision = math.floor(finiteNumber(data.Revision, 0, 0))
-	if sourceVersion < 2 or type(data.Luck) ~= "number" then
-		data.Luck = 1 + data.Rebirths * Economy.LuckPerRebirth
-	else
-		data.Luck = finiteNumber(data.Luck, 1, 1)
+	-- A corrupt load must never become a writable empty inventory.
+	assert(type(raw) == "table", "Persisted profile is not a table")
+	local data = ProfileSchema.New()
+	local version = raw.Version or 0
+	assert(integer(version, 0) and version <= ProfileSchema.Version, "Unsupported persisted schema")
+	for _, key in {"Power", "Gold", "Luck", "Rebirths", "Revision", "OwnerUserId", "ChestSequence"} do
+		if raw[key] ~= nil then (data :: any)[key] = raw[key] end
 	end
-
-	if type(data.OwnedWeapons) ~= "table" then data.OwnedWeapons = {} end
-	for id, count in data.OwnedWeapons do
-		if type(id) ~= "string" or type(count) ~= "number" or count < 1 then data.OwnedWeapons[id] = nil
-		else data.OwnedWeapons[id] = math.floor(count) end
-	end
-	if type(data.EquippedWeapon) ~= "string" then data.EquippedWeapon = "" end
-	if type(data.UnlockedRegions) ~= "table" then data.UnlockedRegions = {} end
+	if version < 2 or raw.Luck == nil then data.Luck = 1 + data.Rebirths * Economy.LuckPerRebirth end
+	if raw.OwnedWeapons ~= nil then data.OwnedWeapons = dictionary(raw.OwnedWeapons, true) end
+	if raw.UnlockedRegions ~= nil then data.UnlockedRegions = dictionary(raw.UnlockedRegions, false) end
 	data.UnlockedRegions.verdant = true
-	if type(data.CurrentRegion) ~= "string" then data.CurrentRegion = "verdant" end
-
-	if type(data.Settings) ~= "table" then data.Settings = copy(template.Settings) end
-	if type(data.Settings.RollAnimation) ~= "boolean" then data.Settings.RollAnimation = true end
-	if type(data.Settings.ReducedMotion) ~= "boolean" then data.Settings.ReducedMotion = false end
-	data.Settings.Volume = math.clamp(finiteNumber(data.Settings.Volume, 0.8, 0), 0, 1)
-	data.Version = ProfileSchema.Version
-	return data :: Types.PlayerData
+	if raw.EquippedWeapon ~= nil then data.EquippedWeapon = raw.EquippedWeapon end
+	if raw.CurrentRegion ~= nil then data.CurrentRegion = raw.CurrentRegion end
+	if raw.LastChestReceipt ~= nil then
+		assert(type(raw.LastChestReceipt) == "table", "Invalid persisted chest receipt")
+		local receipt = raw.LastChestReceipt
+		data.LastChestReceipt = {Sequence = receipt.Sequence, Region = receipt.Region, Id = receipt.Id, RateN = receipt.RateN, Revision = receipt.Revision}
+	end
+	-- Repair presentation preferences without discarding earned progression.
+	if type(raw.Settings) == "table" then
+		for _, key in {"RollAnimation", "ReducedMotion"} do
+			if type(raw.Settings[key]) == "boolean" then (data.Settings :: any)[key] = raw.Settings[key] end
+		end
+		if finite(raw.Settings.Volume) then data.Settings.Volume = math.clamp(raw.Settings.Volume, 0, 1) end
+		if raw.Settings.EffectsQuality == "Auto" or raw.Settings.EffectsQuality == "Low" or raw.Settings.EffectsQuality == "High" then
+			data.Settings.EffectsQuality = raw.Settings.EffectsQuality
+		end
+	end
+	local valid, reason = ProfileSchema.Validate(data)
+	assert(valid, reason)
+	return data
 end
 
 function ProfileSchema.Validate(data: any): (boolean, string?)
-	if type(data) ~= "table" then return false, "profile is not a table" end
-	if data.Version ~= ProfileSchema.Version then return false, "unexpected schema version" end
-	for _, key in {"Power", "Gold", "Luck", "Rebirths", "Revision"} do
-		local value = data[key]
-		if type(value) ~= "number" or value ~= value or math.abs(value) == math.huge then
-			return false, key .. " must be finite numeric"
-		end
+	if type(data) ~= "table" or data.Version ~= ProfileSchema.Version then return false, "unexpected profile schema" end
+	for _, key in {"Power", "Gold", "Luck"} do
+		if not finite(data[key]) or data[key] < (if key == "Luck" then 1 else 0) then return false, key .. " out of range" end
 	end
-	if data.Power < 0 or data.Gold < 0 or data.Luck < 1 or data.Rebirths < 0 then return false, "progression values out of range" end
-	if type(data.OwnedWeapons) ~= "table" or type(data.UnlockedRegions) ~= "table" or type(data.Settings) ~= "table" then return false, "profile containers are invalid" end
-	if type(data.EquippedWeapon) ~= "string" or type(data.CurrentRegion) ~= "string" then return false, "profile identifiers are invalid" end
-	if type(data.Settings.RollAnimation) ~= "boolean" or type(data.Settings.ReducedMotion) ~= "boolean" then return false, "settings booleans are invalid" end
-	if type(data.Settings.Volume) ~= "number" or data.Settings.Volume ~= data.Settings.Volume or data.Settings.Volume < 0 or data.Settings.Volume > 1 then
-		return false, "settings volume is invalid"
+	for _, key in {"Rebirths", "Revision", "ChestSequence"} do
+		if not integer(data[key], 0) then return false, key .. " must be a safe nonnegative integer" end
 	end
+	if not integer(data.OwnerUserId, -MAX_INTEGER) then return false, "invalid inventory owner" end
+	local inventoryOk = pcall(dictionary, data.OwnedWeapons, true)
+	local regionsOk = pcall(dictionary, data.UnlockedRegions, false)
+	if not inventoryOk or not regionsOk then return false, "invalid inventory/region contents" end
+	if type(data.EquippedWeapon) ~= "string" or #data.EquippedWeapon > 80 then return false, "invalid equipped ID" end
+	if data.EquippedWeapon ~= "" and not integer(data.OwnedWeapons[data.EquippedWeapon], 1) then return false, "equipped item is not owned" end
+	if not identifier(data.CurrentRegion) or data.UnlockedRegions[data.CurrentRegion] ~= true then return false, "current region is not unlocked" end
+	if data.UnlockedRegions.verdant ~= true then return false, "starting region is missing" end
+	local receipt = data.LastChestReceipt
+	if data.ChestSequence == 0 then
+		if receipt ~= nil then return false, "unexpected chest receipt" end
+	elseif type(receipt) ~= "table" or receipt.Sequence ~= data.ChestSequence or not identifier(receipt.Id)
+		or not identifier(receipt.Region) or not integer(receipt.RateN, 1) then return false, "invalid chest receipt" end
+	if receipt and receipt.Revision ~= nil and (not integer(receipt.Revision, 0) or receipt.Revision > data.Revision) then
+		return false, "invalid chest receipt revision"
+	end
+	local settings = data.Settings
+	if type(settings) ~= "table" or type(settings.RollAnimation) ~= "boolean" or type(settings.ReducedMotion) ~= "boolean"
+		or not finite(settings.Volume) or settings.Volume < 0 or settings.Volume > 1
+		or (settings.EffectsQuality ~= "Auto" and settings.EffectsQuality ~= "Low" and settings.EffectsQuality ~= "High") then return false, "invalid settings" end
 	return true
 end
 
