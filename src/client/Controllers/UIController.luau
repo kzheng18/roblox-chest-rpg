@@ -69,7 +69,7 @@ local playNextReveal: () -> ()
 -- One chest opening can reveal several items (weapon, then bonus power).
 local revealQueue: {any} = {}
 local activeCinematic: any = nil
-local revealModelCleanup: (() -> ())? = nil
+local revealStage: any = nil -- shared turntable for every reveal
 
 local function setZ(instance: GuiObject, z: number)
 	instance.ZIndex = z
@@ -1129,18 +1129,19 @@ local function buildUI()
 	Components.Corner(reel, 7)
 	Components.Stroke(reel, Colors.Border, 0.38)
 
-	refs.RevealRarity = Components.Label(reel, "RARITY", UDim2.new(1, -24, 0, 20), UDim2.fromOffset(12, 8), Theme.Font.Strong, 11, Colors.Gold, Enum.TextXAlignment.Center)
-	refs.RevealName = Components.Label(reel, "Weapon", UDim2.new(1, -28, 0, 44), UDim2.fromOffset(14, 28), Theme.Font.Display, 24, Colors.Cream, Enum.TextXAlignment.Center)
+	-- Every reveal shares one layout: turntable on the left, text on the right.
+	refs.RevealRarity = Components.Label(reel, "RARITY", UDim2.new(1, -124, 0, 20), UDim2.fromOffset(112, 8), Theme.Font.Strong, 11, Colors.Gold, Enum.TextXAlignment.Center)
+	refs.RevealName = Components.Label(reel, "Weapon", UDim2.new(1, -124, 0, 44), UDim2.fromOffset(112, 28), Theme.Font.Display, 24, Colors.Cream, Enum.TextXAlignment.Center)
 	refs.RevealName.TextWrapped = true
-	refs.RevealOdds = Components.Label(reel, "1/1", UDim2.new(1, -24, 0, 26), UDim2.fromOffset(12, 75), Theme.Font.Display, 17, Colors.Green, Enum.TextXAlignment.Center)
-	-- Spinning 3D model for themed items; labels shift right while it shows.
+	refs.RevealOdds = Components.Label(reel, "1/1", UDim2.new(1, -124, 0, 26), UDim2.fromOffset(112, 75), Theme.Font.Display, 17, Colors.Green, Enum.TextXAlignment.Center)
+	-- The shared spinning turntable. Only the item inside it changes.
 	local viewport = Instance.new("ViewportFrame")
 	viewport.BackgroundTransparency = 1
 	viewport.Size = UDim2.fromOffset(100, 100)
 	viewport.Position = UDim2.fromOffset(6, 6)
-	viewport.Visible = false
 	viewport.Parent = reel
 	refs.RevealViewport = viewport
+	revealStage = ItemModels.Stage(viewport)
 
 	local spinner = Instance.new("Frame")
 	spinner.BackgroundColor3 = Colors.Gold
@@ -1239,24 +1240,8 @@ local function revealTier(rarity: string): string
 	return Showcase.RevealTier[rarity] or "Quick"
 end
 
-local function setRevealModel(model: any?)
-	if revealModelCleanup then revealModelCleanup(); revealModelCleanup = nil end
-	local viewport = refs.RevealViewport :: ViewportFrame
-	local labels = {refs.RevealRarity, refs.RevealName, refs.RevealOdds}
-	if model then
-		viewport.Visible = true
-		revealModelCleanup = ItemModels.Show(viewport, model.Kind, model.Primary, model.Secondary, model.Glow)
-		for _, label in labels do
-			label.Position = UDim2.fromOffset(112, label.Position.Y.Offset)
-			label.Size = UDim2.new(1, -124, 0, label.Size.Y.Offset)
-		end
-	else
-		viewport.Visible = false
-		for _, label in labels do
-			label.Position = UDim2.fromOffset(12, label.Position.Y.Offset)
-			label.Size = UDim2.new(1, -24, 0, label.Size.Y.Offset)
-		end
-	end
+local function setRevealModel(model: any?, silhouette: boolean?)
+	if revealStage then revealStage:Set(model, silhouette) end
 end
 
 local function finishCinematic()
@@ -1356,6 +1341,7 @@ local function showReveal(item: any)
 			;(refs.RevealName :: TextLabel).Text = candidate.Name
 			;(refs.RevealOdds :: TextLabel).Text = "RARITY  " .. RarityFormat.Rate(candidate.RateN)
 			;(refs.RevealOdds :: TextLabel).TextColor3 = color
+			setRevealModel(candidate.Model)
 			task.wait(0.04 + (i / 10) ^ 2 * 0.09)
 		end
 		if tier == "Cinematic" then
@@ -1364,6 +1350,7 @@ local function showReveal(item: any)
 			;(refs.RevealKicker :: TextLabel).Text = "SOMETHING RARE STIRS..."
 			;(refs.RevealName :: TextLabel).Text = "???"
 			;(refs.RevealOdds :: TextLabel).Text = ""
+			setRevealModel(item.Model, true)
 			for pulse = 1, 4 do
 				if token ~= revealToken then return end
 				local on = pulse % 2 == 1
@@ -1388,17 +1375,25 @@ playNextReveal = function()
 	showReveal(item)
 end
 
+local WEAPON_METAL = Color3.fromRGB(206, 212, 224)
+local function weaponModel(weapon: any): any
+	local region = Regions.ById[weapon.Region]
+	return {Kind = weapon.Family, Primary = WEAPON_METAL, Secondary = if region then region.Accent else Colors.Gold, Glow = Theme.RarityColor(weapon.Rarity)}
+end
+
 local function weaponItem(result: any): any
 	local candidates = {}
 	for _, weapon in Weapons.ByRegion[result.Region or state.CurrentRegion] or Weapons.List do
-		table.insert(candidates, {Name = weapon.Name, Rarity = weapon.Rarity, RateN = Progression.CurrentRateN(weapon, state.Luck)})
+		table.insert(candidates, {Name = weapon.Name, Rarity = weapon.Rarity, RateN = Progression.CurrentRateN(weapon, state.Luck), Model = weaponModel(weapon)})
 	end
+	local weapon = Weapons.ById[result.Id]
 	return {
 		Kind = "Weapon", Name = result.Name, Rarity = result.Rarity, RateN = result.RateN,
 		Region = result.Region or state.CurrentRegion, Revision = result.Revision,
 		Kicker = "TREASURE FOUND", RollingKicker = "OPENING TREASURE",
 		Detail = string.format("x%.2f Power   •   %s", result.PowerMultiplier, result.Family),
 		Pool = candidates,
+		Model = if weapon then weaponModel(weapon) else nil,
 	}
 end
 
@@ -1407,11 +1402,17 @@ local function powerItem(result: any, power: any): any?
 	local theme = definition and Powers.ThemeById[definition.Theme]
 	if not definition or not theme then return nil end
 	local region = result.Region or state.CurrentRegion
+	local function powerModel(p: any): any
+		return {Kind = theme.ModelKind, Primary = p.Primary, Secondary = p.Secondary, Glow = Theme.RarityColor(p.Rarity)}
+	end
+	-- Roll only through this anime's items: a Grimoire roll shows Grimoires.
 	local candidates = {}
 	for _, entry in PowerOdds.Table(region, state.Luck) do
-		table.insert(candidates, {Name = entry.Power.Name, Rarity = entry.Power.Rarity, RateN = entry.RateN})
+		if entry.Power.Theme == theme.Id then
+			table.insert(candidates, {Name = entry.Power.Name, Rarity = entry.Power.Rarity, RateN = entry.RateN, Model = powerModel(entry.Power)})
+		end
 	end
-	if #candidates == 0 then candidates = {{Name = definition.Name, Rarity = definition.Rarity, RateN = power.RateN}} end
+	if #candidates == 0 then candidates = {{Name = definition.Name, Rarity = definition.Rarity, RateN = power.RateN, Model = powerModel(definition)}} end
 	local equipped = state.EquippedPowers and state.EquippedPowers[theme.Id] == definition.Id
 	return {
 		Kind = "Power", Name = definition.Name, Rarity = definition.Rarity, RateN = power.RateN,
@@ -1420,7 +1421,7 @@ local function powerItem(result: any, power: any): any?
 		Detail = string.format("x%.2f Power   •   %s slot   •   stacks with other anime powers", definition.PowerMultiplier, theme.Name),
 		Hint = if equipped then "Equipped  •  total power stack x" .. string.format("%.2f", state.PowerStack or 1) else "Added to your collection",
 		Pool = candidates,
-		Model = {Kind = theme.ModelKind, Primary = definition.Primary, Secondary = definition.Secondary, Glow = Theme.RarityColor(definition.Rarity)},
+		Model = powerModel(definition),
 	}
 end
 

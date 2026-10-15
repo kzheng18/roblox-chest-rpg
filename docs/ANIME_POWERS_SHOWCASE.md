@@ -100,7 +100,7 @@ Built and covered by local tests. Not yet synced into the Studio place or playte
 | Equip Best fills every anime slot | `src/server/Services/ProgressionService.luau` |
 | Tiered reveal queue: weapon first, then bonus power | `src/client/Controllers/UIController.luau` |
 | Camera push, darken, burst, shockwave | `src/client/Controllers/CinematicController.luau` |
-| Spinning fruit and grimoire models | `src/client/UI/ItemModels.luau` |
+| Shared spinning turntable, plus fruit, grimoire and weapon models | `src/client/UI/ItemModels.luau` |
 | Announcement banners and chat line | `src/client/Controllers/AnnouncementController.luau` |
 
 ### How a chest opening works now
@@ -108,8 +108,9 @@ Built and covered by local tests. Not yet synced into the Studio place or playte
 1. The weapon roll is unchanged.
 2. A separate bonus roll can also grant a power. Chance per opening: Verdant 12%, Frostfall 14%, Emberreach 16%.
 3. If a power drops, it goes into that anime's slot when it beats what is equipped there.
-4. The reveal plays the weapon, then the power. Common and Uncommon get the normal roll. Rare and Epic add a color flash. Legendary and Mythic get the cinematic. Every reveal can be skipped, and Reduced motion keeps the camera still.
-5. Legendary, Mythic, or 1-in-1,000 pulls are announced to the server. Mythic or 1-in-5,000 pulls are also sent to every server. Cross-server messages are off in Studio.
+4. Every reveal uses one universal layout: the same background, panel, and spinning turntable. Only the item inside changes. During the roll the turntable spins through candidate items, and a power roll only shows items from that anime. Before a Legendary or Mythic reveal, the item spins as a dark silhouette.
+5. The reveal plays the weapon, then the power. Common and Uncommon get the normal roll. Rare and Epic add a color flash. Legendary and Mythic get the cinematic. Every reveal can be skipped, and Reduced motion keeps the camera still.
+6. Legendary, Mythic, or 1-in-1,000 pulls are announced to the server. Mythic or 1-in-5,000 pulls are also sent to every server. Cross-server messages are off in Studio.
 
 Power odds shown to players are exact final odds. Weapon odds keep the existing per-check display, which the scaling review flags separately.
 
