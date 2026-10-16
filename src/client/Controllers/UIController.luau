@@ -1099,6 +1099,10 @@ local function buildUI()
 	revealOverlay.Parent = gui
 	setZ(revealOverlay, 90)
 	refs.RevealOverlay = revealOverlay
+	-- Lets AnnouncementController hold the player's own rare-pull banner until the reveal closes.
+	revealOverlay:GetPropertyChangedSignal("Visible"):Connect(function()
+		player:SetAttribute("RevealOpen", revealOverlay.Visible)
+	end)
 	-- Full-screen rarity flash, layered under the reveal panel.
 	local revealFlash = Instance.new("Frame")
 	revealFlash.BackgroundColor3 = Colors.Cream
@@ -1350,6 +1354,7 @@ local function showReveal(item: any)
 			;(refs.RevealKicker :: TextLabel).Text = "SOMETHING RARE STIRS..."
 			;(refs.RevealName :: TextLabel).Text = "???"
 			;(refs.RevealOdds :: TextLabel).Text = ""
+			refs.RevealSpinner.BackgroundColor3 = color
 			setRevealModel(item.Model, true)
 			for pulse = 1, 4 do
 				if token ~= revealToken then return end

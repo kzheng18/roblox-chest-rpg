@@ -84,16 +84,29 @@ local function valid(message: any): boolean
 		and type(message.RateN) == "number" and message.RateN == message.RateN and message.RateN >= 1
 end
 
+-- The player's own pull would spoil their reveal, so it waits until the
+-- reveal panel closes (UIController sets RevealOpen).
+local held: {any} = {}
+local function receive(message: any)
+	if message.UserId == player.UserId and player:GetAttribute("RevealOpen") == true then
+		table.insert(held, message)
+	else
+		show(message)
+	end
+end
+
 function AnnouncementController.Start()
 	local gui = Instance.new("ScreenGui")
 	gui.Name = "RarePullAnnouncements"
 	gui.ResetOnSpawn = false
 	gui.DisplayOrder = 5
+	-- Sit in the free strip at the very top so banners never cover the reveal panel.
+	gui.IgnoreGuiInset = true
 	gui.Parent = player:WaitForChild("PlayerGui")
 	local frame = Instance.new("Frame")
 	frame.BackgroundTransparency = 1
 	frame.AnchorPoint = Vector2.new(0.5, 0)
-	frame.Position = UDim2.new(0.5, 0, 0, 206)
+	frame.Position = UDim2.new(0.5, 0, 0, 6)
 	frame.Size = UDim2.new(0, 420, 0, MAX_BANNERS * (BANNER_HEIGHT + 6))
 	frame.Parent = gui
 	local limit = Instance.new("UISizeConstraint")
@@ -102,7 +115,13 @@ function AnnouncementController.Start()
 	frame.Size = UDim2.new(1, -24, 0, MAX_BANNERS * (BANNER_HEIGHT + 6))
 	container = frame
 	Remote.OnClientEvent:Connect(function(action: string, payload: any)
-		if action == "Announce" and valid(payload) then show(payload) end
+		if action == "Announce" and valid(payload) then receive(payload) end
+	end)
+	player:GetAttributeChangedSignal("RevealOpen"):Connect(function()
+		if player:GetAttribute("RevealOpen") == true then return end
+		local pending = held
+		held = {}
+		for _, message in pending do show(message) end
 	end)
 end
 
