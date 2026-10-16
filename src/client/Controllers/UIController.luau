@@ -13,11 +13,16 @@ local RarityFormat = require(Shared.Util.RarityFormat)
 local Regions = require(Shared.Config.Regions)
 local Weapons = require(Shared.Config.Weapons)
 local Economy = require(Shared.Config.Economy)
+local Powers = require(Shared.Config.Powers)
+local Showcase = require(Shared.Config.Showcase)
+local PowerOdds = require(Shared.Util.PowerOdds)
 
 local UI = script.Parent.Parent.UI
 local Theme = require(UI.Theme)
 local Components = require(UI.Components)
 local Icons = require(UI.Icons)
+local ItemModels = require(UI.ItemModels)
+local Cinematic = require(script.Parent.CinematicController)
 local Colors = Theme.Colors
 
 local UIController = {}
@@ -60,6 +65,11 @@ end
 
 local NAV_ITEMS = {"Inventory", "Chest", "Regions", "Rebirth", "Settings"}
 local settleReveal: (any, number) -> ()
+local playNextReveal: () -> ()
+-- One chest opening can reveal several items (weapon, then bonus power).
+local revealQueue: {any} = {}
+local activeCinematic: any = nil
+local revealStage: any = nil -- shared turntable for every reveal
 
 local function setZ(instance: GuiObject, z: number)
 	instance.ZIndex = z
@@ -1089,6 +1099,18 @@ local function buildUI()
 	revealOverlay.Parent = gui
 	setZ(revealOverlay, 90)
 	refs.RevealOverlay = revealOverlay
+	-- Lets AnnouncementController hold the player's own rare-pull banner until the reveal closes.
+	revealOverlay:GetPropertyChangedSignal("Visible"):Connect(function()
+		player:SetAttribute("RevealOpen", revealOverlay.Visible)
+	end)
+	-- Full-screen rarity flash, layered under the reveal panel.
+	local revealFlash = Instance.new("Frame")
+	revealFlash.BackgroundColor3 = Colors.Cream
+	revealFlash.BackgroundTransparency = 1
+	revealFlash.BorderSizePixel = 0
+	revealFlash.Size = UDim2.fromScale(1, 1)
+	revealFlash.Parent = revealOverlay
+	refs.RevealFlash = revealFlash
 	local reveal = Components.Panel(revealOverlay, UDim2.fromOffset(500, 286), UDim2.new(0.5, 0, 0.5, 0), true)
 	reveal.AnchorPoint = Vector2.new(0.5, 0.5)
 	refs.Reveal = reveal
@@ -1111,10 +1133,19 @@ local function buildUI()
 	Components.Corner(reel, 7)
 	Components.Stroke(reel, Colors.Border, 0.38)
 
-	refs.RevealRarity = Components.Label(reel, "RARITY", UDim2.new(1, -24, 0, 20), UDim2.fromOffset(12, 8), Theme.Font.Strong, 11, Colors.Gold, Enum.TextXAlignment.Center)
-	refs.RevealName = Components.Label(reel, "Weapon", UDim2.new(1, -28, 0, 44), UDim2.fromOffset(14, 28), Theme.Font.Display, 24, Colors.Cream, Enum.TextXAlignment.Center)
+	-- Every reveal shares one layout: turntable on the left, text on the right.
+	refs.RevealRarity = Components.Label(reel, "RARITY", UDim2.new(1, -124, 0, 20), UDim2.fromOffset(112, 8), Theme.Font.Strong, 11, Colors.Gold, Enum.TextXAlignment.Center)
+	refs.RevealName = Components.Label(reel, "Weapon", UDim2.new(1, -124, 0, 44), UDim2.fromOffset(112, 28), Theme.Font.Display, 24, Colors.Cream, Enum.TextXAlignment.Center)
 	refs.RevealName.TextWrapped = true
-	refs.RevealOdds = Components.Label(reel, "1/1", UDim2.new(1, -24, 0, 26), UDim2.fromOffset(12, 75), Theme.Font.Display, 17, Colors.Green, Enum.TextXAlignment.Center)
+	refs.RevealOdds = Components.Label(reel, "1/1", UDim2.new(1, -124, 0, 26), UDim2.fromOffset(112, 75), Theme.Font.Display, 17, Colors.Green, Enum.TextXAlignment.Center)
+	-- The shared spinning turntable. Only the item inside it changes.
+	local viewport = Instance.new("ViewportFrame")
+	viewport.BackgroundTransparency = 1
+	viewport.Size = UDim2.fromOffset(100, 100)
+	viewport.Position = UDim2.fromOffset(6, 6)
+	viewport.Parent = reel
+	refs.RevealViewport = viewport
+	revealStage = ItemModels.Stage(viewport)
 
 	local spinner = Instance.new("Frame")
 	spinner.BackgroundColor3 = Colors.Gold
@@ -1135,7 +1166,7 @@ local function buildUI()
 			return
 		end
 		revealToken += 1
-		revealOverlay.Visible = false
+		playNextReveal()
 	end)
 	refs.RevealContinue = continue
 
@@ -1209,28 +1240,56 @@ showToast = function(message: string)
 	end)
 end
 
-settleReveal = function(result: any, token: number)
+local function revealTier(rarity: string): string
+	return Showcase.RevealTier[rarity] or "Quick"
+end
+
+local function setRevealModel(model: any?, silhouette: boolean?)
+	if revealStage then revealStage:Set(model, silhouette) end
+end
+
+local function finishCinematic()
+	if activeCinematic then activeCinematic:Finish(); activeCinematic = nil end
+end
+
+local function flash(color: Color3, strength: number)
+	local frame = refs.RevealFlash :: Frame
+	frame.BackgroundColor3 = color
+	frame.BackgroundTransparency = 1 - strength
+	TweenService:Create(frame, TweenInfo.new(0.55, Enum.EasingStyle.Quad), {BackgroundTransparency = 1}):Play()
+end
+
+settleReveal = function(item: any, token: number)
 	if token ~= revealToken then return end
-	local rarityColor = Theme.RarityColor(result.Rarity)
+	local rarityColor = Theme.RarityColor(item.Rarity)
+	local tier = revealTier(item.Rarity)
+	local reduced = state and state.Settings and state.Settings.ReducedMotion
 	refs.RevealAccent.BackgroundColor3 = rarityColor
 	refs.RevealSpinner.BackgroundColor3 = rarityColor
 	refs.RevealSpinner.Size = UDim2.new(1, 0, 0, 3)
-	;(refs.RevealKicker :: TextLabel).Text = "TREASURE FOUND"
+	;(refs.RevealKicker :: TextLabel).Text = item.Kicker
 	;(refs.RevealKicker :: TextLabel).TextColor3 = Colors.Gold
-	;(refs.RevealRarity :: TextLabel).Text = string.upper(result.Rarity)
+	;(refs.RevealRarity :: TextLabel).Text = string.upper(item.Rarity)
 	;(refs.RevealRarity :: TextLabel).TextColor3 = rarityColor
-	;(refs.RevealName :: TextLabel).Text = result.Name
-	;(refs.RevealOdds :: TextLabel).Text = "RARITY  " .. RarityFormat.Rate(result.RateN)
+	;(refs.RevealName :: TextLabel).Text = item.Name
+	;(refs.RevealOdds :: TextLabel).Text = "RARITY  " .. RarityFormat.Rate(item.RateN)
 	;(refs.RevealOdds :: TextLabel).TextColor3 = rarityColor
-	;(refs.RevealPower :: TextLabel).Text = string.format("x%.2f Power   •   %s", result.PowerMultiplier, result.Family)
-	;(refs.RevealHint :: TextLabel).Text = "Added to your inventory"
-	;(refs.RevealContinue :: TextButton).Text = "CONTINUE"
+	;(refs.RevealPower :: TextLabel).Text = item.Detail
+	;(refs.RevealHint :: TextLabel).Text = item.Hint or "Added to your inventory"
+	;(refs.RevealContinue :: TextButton).Text = if #revealQueue > 0 then "NEXT" else "CONTINUE"
+	setRevealModel(item.Model)
 	refs.RevealRolling = false
 	refs.PendingReveal = nil
-	refs.LastRevealRevision = result.Revision
+	refs.LastRevealRevision = item.Revision
 	if refs.UpdateSaveIndicator then refs.UpdateSaveIndicator() end
+	local overlay = refs.RevealOverlay :: Frame
+	if tier == "Cinematic" and activeCinematic then activeCinematic:Burst() end
+	if not reduced then
+		if tier == "Cinematic" then flash(rarityColor, 0.55) elseif tier == "Glow" then flash(rarityColor, 0.3) end
+	end
+	TweenService:Create(overlay, Theme.Motion.Quick, {BackgroundTransparency = 0.22}):Play()
 	local reveal = refs.Reveal :: Frame
-	if not (state and state.Settings and state.Settings.ReducedMotion) then
+	if not reduced then
 		local finalSize = if refs.IsCompact then UDim2.new(1, -36, 0, 286) else UDim2.fromOffset(500, 286)
 		local startSize = if refs.IsCompact then UDim2.new(1, -66, 0, 262) else UDim2.fromOffset(458, 262)
 		reveal.Size = startSize
@@ -1238,39 +1297,42 @@ settleReveal = function(result: any, token: number)
 	end
 end
 
-local function showChestResult(result: any)
-	if state and state.Settings and state.Settings.RollAnimation == false then
-		showToast(string.format("%s  •  %s  •  %s  •  x%.2f", result.Name, result.Rarity, RarityFormat.Rate(result.RateN), result.PowerMultiplier))
-		return
-	end
-
+local function showReveal(item: any)
 	revealToken += 1
 	local token = revealToken
+	local tier = revealTier(item.Rarity)
+	local reduced = state and state.Settings and state.Settings.ReducedMotion
 	local overlay = refs.RevealOverlay :: Frame
 	overlay.Visible = true
 	overlay.BackgroundTransparency = 1
-	TweenService:Create(overlay, Theme.Motion.Quick, {BackgroundTransparency = 0.22}):Play()
+	-- Cinematics keep the world visible so the camera push to the chest reads.
+	TweenService:Create(overlay, Theme.Motion.Quick, {BackgroundTransparency = if tier == "Cinematic" and not reduced then 0.62 else 0.22}):Play()
 	local reveal = refs.Reveal :: Frame
 	reveal.Size = if refs.IsCompact then UDim2.new(1, -36, 0, 286) else UDim2.fromOffset(500, 286)
-	refs.PendingReveal = result
+	refs.PendingReveal = item
 	refs.RevealRolling = true
 	;(refs.RevealContinue :: TextButton).Text = "SKIP"
 	refs.RevealSpinner.Size = UDim2.new(0, 0, 0, 3)
-	local reduced = state and state.Settings and state.Settings.ReducedMotion
+	setRevealModel(nil)
+	if tier == "Cinematic" then
+		finishCinematic()
+		activeCinematic = Cinematic.Begin(item.Region, Theme.RarityColor(item.Rarity), not reduced)
+	end
 	if reduced then
-		settleReveal(result, token)
+		settleReveal(item, token)
 		return
 	end
 
-	;(refs.RevealKicker :: TextLabel).Text = "OPENING TREASURE"
+	;(refs.RevealKicker :: TextLabel).Text = item.RollingKicker
 	;(refs.RevealRarity :: TextLabel).Text = "ROLLING..."
 	;(refs.RevealName :: TextLabel).Text = "???"
 	;(refs.RevealOdds :: TextLabel).Text = "CALCULATING  1/N"
 	;(refs.RevealOdds :: TextLabel).TextColor3 = Colors.Gold
 	;(refs.RevealPower :: TextLabel).Text = ""
 	;(refs.RevealHint :: TextLabel).Text = "CLICK SKIP TO REVEAL NOW"
-	local pool = Weapons.ByRegion[result.Region or state.CurrentRegion] or Weapons.List
+	local pool = item.Pool
 	task.spawn(function()
+		-- The shared roll: ~0.9 s, same for every anime and item type.
 		for i = 1, 10 do
 			if token ~= revealToken then return end
 			local candidate = pool[((i * 5 + token) % #pool) + 1]
@@ -1281,12 +1343,109 @@ local function showChestResult(result: any)
 			;(refs.RevealRarity :: TextLabel).Text = string.upper(candidate.Rarity)
 			;(refs.RevealRarity :: TextLabel).TextColor3 = color
 			;(refs.RevealName :: TextLabel).Text = candidate.Name
-			;(refs.RevealOdds :: TextLabel).Text = "RARITY  " .. RarityFormat.Rate(Progression.CurrentRateN(candidate, state.Luck))
+			;(refs.RevealOdds :: TextLabel).Text = "RARITY  " .. RarityFormat.Rate(candidate.RateN)
 			;(refs.RevealOdds :: TextLabel).TextColor3 = color
+			setRevealModel(candidate.Model)
 			task.wait(0.04 + (i / 10) ^ 2 * 0.09)
 		end
-		settleReveal(result, token)
+		if tier == "Cinematic" then
+			-- Suspense beat in the true rarity color while the camera settles on the chest.
+			local color = Theme.RarityColor(item.Rarity)
+			;(refs.RevealKicker :: TextLabel).Text = "SOMETHING RARE STIRS..."
+			;(refs.RevealName :: TextLabel).Text = "???"
+			;(refs.RevealOdds :: TextLabel).Text = ""
+			refs.RevealSpinner.BackgroundColor3 = color
+			setRevealModel(item.Model, true)
+			for pulse = 1, 4 do
+				if token ~= revealToken then return end
+				local on = pulse % 2 == 1
+				refs.RevealAccent.BackgroundColor3 = if on then color else Colors.Gold
+				;(refs.RevealRarity :: TextLabel).Text = if on then string.upper(item.Rarity) .. "?" else "..."
+				;(refs.RevealRarity :: TextLabel).TextColor3 = color
+				task.wait(0.2)
+			end
+		end
+		settleReveal(item, token)
 	end)
+end
+
+playNextReveal = function()
+	finishCinematic()
+	local item = table.remove(revealQueue, 1)
+	if not item then
+		setRevealModel(nil)
+		;(refs.RevealOverlay :: Frame).Visible = false
+		return
+	end
+	showReveal(item)
+end
+
+local WEAPON_METAL = Color3.fromRGB(206, 212, 224)
+local function weaponModel(weapon: any): any
+	local region = Regions.ById[weapon.Region]
+	return {Kind = weapon.Family, Primary = WEAPON_METAL, Secondary = if region then region.Accent else Colors.Gold, Glow = Theme.RarityColor(weapon.Rarity)}
+end
+
+local function weaponItem(result: any): any
+	local candidates = {}
+	for _, weapon in Weapons.ByRegion[result.Region or state.CurrentRegion] or Weapons.List do
+		table.insert(candidates, {Name = weapon.Name, Rarity = weapon.Rarity, RateN = Progression.CurrentRateN(weapon, state.Luck), Model = weaponModel(weapon)})
+	end
+	local weapon = Weapons.ById[result.Id]
+	return {
+		Kind = "Weapon", Name = result.Name, Rarity = result.Rarity, RateN = result.RateN,
+		Region = result.Region or state.CurrentRegion, Revision = result.Revision,
+		Kicker = "TREASURE FOUND", RollingKicker = "OPENING TREASURE",
+		Detail = string.format("x%.2f Power   •   %s", result.PowerMultiplier, result.Family),
+		Pool = candidates,
+		Model = if weapon then weaponModel(weapon) else nil,
+	}
+end
+
+local function powerItem(result: any, power: any): any?
+	local definition = Powers.ById[power.Id]
+	local theme = definition and Powers.ThemeById[definition.Theme]
+	if not definition or not theme then return nil end
+	local region = result.Region or state.CurrentRegion
+	local function powerModel(p: any): any
+		return {Kind = theme.ModelKind, Primary = p.Primary, Secondary = p.Secondary, Glow = Theme.RarityColor(p.Rarity)}
+	end
+	-- Roll only through this anime's items: a Grimoire roll shows Grimoires.
+	local candidates = {}
+	for _, entry in PowerOdds.Table(region, state.Luck) do
+		if entry.Power.Theme == theme.Id then
+			table.insert(candidates, {Name = entry.Power.Name, Rarity = entry.Power.Rarity, RateN = entry.RateN, Model = powerModel(entry.Power)})
+		end
+	end
+	if #candidates == 0 then candidates = {{Name = definition.Name, Rarity = definition.Rarity, RateN = power.RateN, Model = powerModel(definition)}} end
+	local equipped = state.EquippedPowers and state.EquippedPowers[theme.Id] == definition.Id
+	return {
+		Kind = "Power", Name = definition.Name, Rarity = definition.Rarity, RateN = power.RateN,
+		Region = region, Revision = result.Revision,
+		Kicker = "BONUS " .. string.upper(theme.SlotName) .. " FOUND", RollingKicker = "SOMETHING ELSE IS INSIDE...",
+		Detail = string.format("x%.2f Power   •   %s slot   •   stacks with other anime powers", definition.PowerMultiplier, theme.Name),
+		Hint = if equipped then "Equipped  •  total power stack x" .. string.format("%.2f", state.PowerStack or 1) else "Added to your collection",
+		Pool = candidates,
+		Model = powerModel(definition),
+	}
+end
+
+local function showChestResult(result: any)
+	local items = {weaponItem(result)}
+	if type(result.Power) == "table" then
+		local item = powerItem(result, result.Power)
+		if item then table.insert(items, item) end
+	end
+	if state and state.Settings and state.Settings.RollAnimation == false then
+		local parts = {}
+		for _, item in items do
+			table.insert(parts, string.format("%s  •  %s  •  %s", item.Name, item.Rarity, RarityFormat.Rate(item.RateN)))
+		end
+		showToast(table.concat(parts, "   +   "))
+		return
+	end
+	revealQueue = items
+	playNextReveal()
 end
 
 function UIController.Start()
@@ -1313,6 +1472,8 @@ function UIController.Start()
 			refreshHUD()
 			local modalRelevant = changes.OwnedWeapons ~= nil
 				or changes.EquippedWeapon ~= nil
+				or changes.OwnedPowers ~= nil
+				or changes.EquippedPowers ~= nil
 				or changes.UnlockedRegions ~= nil
 				or changes.CurrentRegion ~= nil
 				or changes.Settings ~= nil

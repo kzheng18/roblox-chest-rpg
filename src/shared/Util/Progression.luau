@@ -3,6 +3,7 @@ local Shared = script.Parent.Parent
 local Economy = require(Shared.Config.Economy)
 local Regions = require(Shared.Config.Regions)
 local Weapons = require(Shared.Config.Weapons)
+local Powers = require(Shared.Config.Powers)
 local Types = require(Shared.Types)
 local ProfileSchema = require(Shared.Util.ProfileSchema)
 
@@ -31,9 +32,41 @@ function Progression.WeaponMultiplier(data: Types.PlayerData): number
 	return if weapon and Progression.OwnsWeapon(data, weapon.Id) then weapon.PowerMultiplier else 1
 end
 
+function Progression.OwnsPower(data: Types.PlayerData, powerId: string): boolean
+	local count = data.OwnedPowers[powerId]
+	return Powers.ById[powerId] ~= nil and type(count) == "number"
+		and count == count and count > 0 and count <= 2^53 - 1 and count % 1 == 0
+end
+
+-- Multiplier from the power equipped in one theme's slot (1 when empty).
+function Progression.ThemeMultiplier(data: Types.PlayerData, themeId: string): number
+	local power = Powers.ById[data.EquippedPowers[themeId] or ""]
+	return if power and power.Theme == themeId and Progression.OwnsPower(data, power.Id) then power.PowerMultiplier else 1
+end
+
+-- Every anime theme has its own slot, and the slots multiply together.
+function Progression.PowerStackMultiplier(data: Types.PlayerData): number
+	local total = 1
+	for _, theme in Powers.Themes do
+		total *= Progression.ThemeMultiplier(data, theme.Id)
+	end
+	return total
+end
+
+function Progression.BestOwnedPower(data: Types.PlayerData, themeId: string): string
+	local bestId, bestMultiplier = "", 1
+	for powerId in data.OwnedPowers do
+		local power = Powers.ById[powerId]
+		if power and power.Theme == themeId and Progression.OwnsPower(data, powerId) and power.PowerMultiplier > bestMultiplier then
+			bestId, bestMultiplier = powerId, power.PowerMultiplier
+		end
+	end
+	return bestId
+end
+
 function Progression.PowerGain(data: Types.PlayerData): number
 	local rebirthMultiplier = 1 + data.Rebirths * Economy.PowerPerRebirth
-	return Economy.BasePowerGain * rebirthMultiplier * Progression.WeaponMultiplier(data)
+	return Economy.BasePowerGain * rebirthMultiplier * Progression.WeaponMultiplier(data) * Progression.PowerStackMultiplier(data)
 end
 
 function Progression.GoldGain(data: Types.PlayerData): number

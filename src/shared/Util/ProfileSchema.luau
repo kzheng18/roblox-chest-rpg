@@ -3,7 +3,7 @@ local Shared = script.Parent.Parent
 local Economy = require(Shared.Config.Economy)
 local Types = require(Shared.Types)
 local ProfileSchema = {}
-ProfileSchema.Version = 3
+ProfileSchema.Version = 4
 local MAX_INTEGER = 2 ^ 53 - 1
 
 local function finite(value: any): boolean
@@ -27,6 +27,16 @@ local function dictionary(raw: any, inventory: boolean): any
 	end
 	return result
 end
+local function equippedSlots(raw: any): {[string]: string}
+	assert(type(raw) == "table", "Invalid persisted equipped powers")
+	local result, size = {}, 0
+	for slot, id in raw do
+		size += 1
+		assert(size <= 64 and identifier(slot) and identifier(id), "Invalid persisted equipped power")
+		result[slot] = id
+	end
+	return result
+end
 
 function ProfileSchema.New(): Types.PlayerData
 	return {
@@ -34,6 +44,7 @@ function ProfileSchema.New(): Types.PlayerData
 		ChestSequence = 0, LastChestReceipt = nil,
 		Power = 0, Gold = Economy.StartingGold, Luck = 1, Rebirths = 0,
 		OwnedWeapons = {}, EquippedWeapon = "",
+		OwnedPowers = {}, EquippedPowers = {},
 		UnlockedRegions = {verdant = true}, CurrentRegion = "verdant",
 		Settings = {RollAnimation = true, ReducedMotion = false, Volume = 0.8, EffectsQuality = "Auto"},
 	}
@@ -50,6 +61,9 @@ function ProfileSchema.Migrate(raw: any): Types.PlayerData
 	end
 	if version < 2 or raw.Luck == nil then data.Luck = 1 + data.Rebirths * Economy.LuckPerRebirth end
 	if raw.OwnedWeapons ~= nil then data.OwnedWeapons = dictionary(raw.OwnedWeapons, true) end
+	-- Version 4 adds powers. Older profiles start with none.
+	if raw.OwnedPowers ~= nil then data.OwnedPowers = dictionary(raw.OwnedPowers, true) end
+	if raw.EquippedPowers ~= nil then data.EquippedPowers = equippedSlots(raw.EquippedPowers) end
 	if raw.UnlockedRegions ~= nil then data.UnlockedRegions = dictionary(raw.UnlockedRegions, false) end
 	data.UnlockedRegions.verdant = true
 	if raw.EquippedWeapon ~= nil then data.EquippedWeapon = raw.EquippedWeapon end
@@ -57,7 +71,8 @@ function ProfileSchema.Migrate(raw: any): Types.PlayerData
 	if raw.LastChestReceipt ~= nil then
 		assert(type(raw.LastChestReceipt) == "table", "Invalid persisted chest receipt")
 		local receipt = raw.LastChestReceipt
-		data.LastChestReceipt = {Sequence = receipt.Sequence, Region = receipt.Region, Id = receipt.Id, RateN = receipt.RateN, Revision = receipt.Revision}
+		data.LastChestReceipt = {Sequence = receipt.Sequence, Region = receipt.Region, Id = receipt.Id, RateN = receipt.RateN, Revision = receipt.Revision,
+			PowerId = receipt.PowerId, PowerRateN = receipt.PowerRateN}
 	end
 	-- Repair presentation preferences without discarding earned progression.
 	if type(raw.Settings) == "table" then
@@ -88,6 +103,12 @@ function ProfileSchema.Validate(data: any): (boolean, string?)
 	if not inventoryOk or not regionsOk then return false, "invalid inventory/region contents" end
 	if type(data.EquippedWeapon) ~= "string" or #data.EquippedWeapon > 80 then return false, "invalid equipped ID" end
 	if data.EquippedWeapon ~= "" and not integer(data.OwnedWeapons[data.EquippedWeapon], 1) then return false, "equipped item is not owned" end
+	local powersOk = pcall(dictionary, data.OwnedPowers, true)
+	local slotsOk, slots = pcall(equippedSlots, data.EquippedPowers)
+	if not powersOk or not slotsOk then return false, "invalid power inventory" end
+	for _, id in slots do
+		if not integer(data.OwnedPowers[id], 1) then return false, "equipped power is not owned" end
+	end
 	if not identifier(data.CurrentRegion) or data.UnlockedRegions[data.CurrentRegion] ~= true then return false, "current region is not unlocked" end
 	if data.UnlockedRegions.verdant ~= true then return false, "starting region is missing" end
 	local receipt = data.LastChestReceipt
@@ -95,6 +116,8 @@ function ProfileSchema.Validate(data: any): (boolean, string?)
 		if receipt ~= nil then return false, "unexpected chest receipt" end
 	elseif type(receipt) ~= "table" or receipt.Sequence ~= data.ChestSequence or not identifier(receipt.Id)
 		or not identifier(receipt.Region) or not integer(receipt.RateN, 1) then return false, "invalid chest receipt" end
+	if receipt and (receipt.PowerId ~= nil or receipt.PowerRateN ~= nil)
+		and (not identifier(receipt.PowerId) or not integer(receipt.PowerRateN, 1)) then return false, "invalid chest power receipt" end
 	if receipt and receipt.Revision ~= nil and (not integer(receipt.Revision, 0) or receipt.Revision > data.Revision) then
 		return false, "invalid chest receipt revision"
 	end

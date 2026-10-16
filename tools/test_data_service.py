@@ -156,7 +156,7 @@ test("legacy migration retains items and queues an owner-bound checkpoint",funct
     local f=fixture.new(); fixture.seed(f.Player,{Version=2,OwnedWeapons={verdant_iron_sword=3,retired_blade=9},Gold=500})
     fixture.join(f.Player); fixture.tick(5)
     local saved=fixture.record(f.Player)
-    assert(saved.OwnerUserId==f.Player.UserId and saved.Version==3 and saved.Gold==500)
+    assert(saved.OwnerUserId==f.Player.UserId and saved.Version==4 and saved.Gold==500)
     assert(saved.OwnedWeapons.verdant_iron_sword==3 and saved.OwnedWeapons.retired_blade==9)
 end)
 test("ordinary progression autosaves without a manual save request",function()

@@ -34,7 +34,8 @@ local CFrame = {new=function(v) return setmetatable({Position=v},cframeMT) end}
 Vector3.zero = Vector3.new(0,0,0)
 -- Predictable fallback draws. Probability distribution tests require a separate RNG harness.
 local Random = {new=function() return {NextInteger=function(_,_,maximum) return maximum end} end}
-local game = {ReplicatedStorage={}, ServerScriptService={}}
+local game = {ReplicatedStorage={}, ServerScriptService={}, JobId="test-job",
+    RunService={IsStudio=function() return true end}, MessagingService={}}
 local workspace = {Children={}}
 function workspace:FindFirstChild(name) return self.Children[name] end
 local function signal()
@@ -63,6 +64,8 @@ node(server,"Components"); node(server,"Services")
 local events, profiles, saves, touches, snapshots = {}, {}, {}, {}, {}
 local remote = {OnServerEvent=signal(), FireClient=function(_,player,kind,payload)
     table.insert(events, {Player=player, Kind=kind, Payload=payload})
+end, FireAllClients=function(_,kind,payload)
+    table.insert(events, {Player="all", Kind=kind, Payload=payload})
 end}
 cache[node(shared,"Remotes")] = {Get=function() return remote end}
 cache[node(server.Services,"DataService")] = {
@@ -151,7 +154,7 @@ modules = [p for p in modules if p.name != 'Remotes.luau']
 modules += [ROOT / 'src/server/Components' / (name + '.luau') for name in
             ('IntentGate', 'RequestContext', 'Diagnostics', 'SaveCoordinator', 'RecoveryPlan')]
 modules += [ROOT / 'src/server/Services' / (name + '.luau') for name in
-            ('ChestService', 'ProgressionService', 'RegionService', 'GameService', 'PlayerService')]
+            ('AnnouncementService', 'ChestService', 'ProgressionService', 'RegionService', 'GameService', 'PlayerService')]
 for path in modules:
     relative = path.relative_to(ROOT / 'src')
     parts = list(relative.with_suffix('').parts)

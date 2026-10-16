@@ -1,6 +1,7 @@
 --!strict
 local Shared = game.ReplicatedStorage.Shared
 local Economy = require(Shared.Config.Economy)
+local Powers = require(Shared.Config.Powers)
 local Progression = require(Shared.Util.Progression)
 local DataService = require(script.Parent.DataService)
 local RequestContext = require(script.Parent.Parent.Components.RequestContext)
@@ -34,9 +35,15 @@ function ProgressionService.EquipBest(player: Player)
 	local data = RequestContext.GetData(player, "EquipBest", nil)
 	if not data then return end
 	local best = Progression.BestOwnedWeapon(data)
-	if best == "" then return end
-	data.EquippedWeapon = best
-	DataService.Touch(player, {"EquippedWeapon", "PowerGain"}, true)
+	local changed = false
+	if best ~= "" then data.EquippedWeapon = best; changed = true end
+	-- Fill every anime slot with its strongest owned power.
+	for _, theme in Powers.Themes do
+		local bestPower = Progression.BestOwnedPower(data, theme.Id)
+		if bestPower ~= "" then data.EquippedPowers[theme.Id] = bestPower; changed = true end
+	end
+	if not changed then return end
+	DataService.Touch(player, {"EquippedWeapon", "EquippedPowers", "PowerGain", "PowerStack"}, true)
 	DataService.RequestSave(player, "Weapon equip")
 end
 
